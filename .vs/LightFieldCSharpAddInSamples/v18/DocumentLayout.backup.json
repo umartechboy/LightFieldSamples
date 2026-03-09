@@ -3,30 +3,28 @@
   "WorkspaceRootPath": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|c:\\users\\fatima.bajwa\\desktop\\umar\\pycontrol-master\\manual\\lightfield\\add-in and automation sdk\\samples\\csharp add-ins\\bap_lab_simplemultipointspectroscope\\simplemultipointspectroscopeaddin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|solutionrelative:bap_lab_simplemultipointspectroscope\\simplemultipointspectroscopeaddin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|c:\\users\\fatima.bajwa\\desktop\\umar\\pycontrol-master\\manual\\lightfield\\add-in and automation sdk\\samples\\csharp add-ins\\plot sample\\plotsample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|solutionrelative:plot sample\\plotsample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|c:\\users\\fatima.bajwa\\desktop\\umar\\pycontrol-master\\manual\\lightfield\\add-in and automation sdk\\samples\\csharp add-ins\\plot sample\\plotsample.bmp||{177559E0-D141-11D0-92DF-00A0C9138C45}",
-      "RelativeMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|solutionrelative:plot sample\\plotsample.bmp||{177559E0-D141-11D0-92DF-00A0C9138C45}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|c:\\users\\fatima.bajwa\\desktop\\umar\\pycontrol-master\\manual\\lightfield\\add-in and automation sdk\\samples\\csharp add-ins\\acquire async sample\\acquireasyncsample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|solutionrelative:acquire async sample\\acquireasyncsample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|c:\\users\\fatima.bajwa\\desktop\\umar\\pycontrol-master\\manual\\lightfield\\add-in and automation sdk\\samples\\csharp add-ins\\acquire async sample\\asynacquiresample.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|solutionrelative:acquire async sample\\asynacquiresample.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|c:\\users\\fatima.bajwa\\desktop\\umar\\pycontrol-master\\manual\\lightfield\\add-in and automation sdk\\samples\\csharp add-ins\\acquire async sample\\asynacquiresample.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\acquire async sample\\asynacquiresample.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|solutionrelative:acquire async sample\\asynacquiresample.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{00000000-0000-0000-0000-000000000000}|\u003CSolution\u003E|LightFieldCSharpAddInSamples||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\plot sample\\plotsample.bmp||{177559E0-D141-11D0-92DF-00A0C9138C45}",
+      "RelativeMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|solutionrelative:plot sample\\plotsample.bmp||{177559E0-D141-11D0-92DF-00A0C9138C45}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|c:\\users\\fatima.bajwa\\desktop\\umar\\pycontrol-master\\manual\\lightfield\\add-in and automation sdk\\samples\\csharp add-ins\\||{B270807C-D8C6-49EB-8EBE-8E8D566637A1}|a54ad834-9219-4aa6-b589-607af21c3e26"
+      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\acquire async sample\\acquireasyncsample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|solutionrelative:acquire async sample\\acquireasyncsample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\acquire async sample\\asynacquiresample.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|solutionrelative:acquire async sample\\asynacquiresample.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -41,68 +39,67 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "PlotSample.cs",
-              "DocumentMoniker": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Plot Sample\\PlotSample.cs",
-              "RelativeDocumentMoniker": "Plot Sample\\PlotSample.cs",
-              "ToolTip": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Plot Sample\\PlotSample.cs",
-              "RelativeToolTip": "Plot Sample\\PlotSample.cs",
-              "ViewState": "AgIAAGoAAAAAAAAAAAAawGUAAAA8AAAAAAAAAA==",
+              "Title": "SimpleMultipointSpectroscopeAddin.cs",
+              "DocumentMoniker": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\BAP_Lab_SimpleMultipointSpectroscope\\SimpleMultipointSpectroscopeAddin.cs",
+              "RelativeDocumentMoniker": "BAP_Lab_SimpleMultipointSpectroscope\\SimpleMultipointSpectroscopeAddin.cs",
+              "ToolTip": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\BAP_Lab_SimpleMultipointSpectroscope\\SimpleMultipointSpectroscopeAddin.cs",
+              "RelativeToolTip": "BAP_Lab_SimpleMultipointSpectroscope\\SimpleMultipointSpectroscopeAddin.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-09T11:58:51.09Z",
+              "WhenOpened": "2026-03-09T12:37:07.884Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "PlotSample.cs",
+              "DocumentMoniker": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Plot Sample\\PlotSample.cs",
+              "RelativeDocumentMoniker": "Plot Sample\\PlotSample.cs",
+              "ToolTip": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Plot Sample\\PlotSample.cs",
+              "RelativeToolTip": "Plot Sample\\PlotSample.cs",
+              "ViewState": "AgIAAGoAAAAAAAAAAAAawHMAAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-09T12:30:03.058Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "PlotSample.bmp -  [English (United States)] - Bitmap [42x42, 4 bit, BMP]",
               "DocumentMoniker": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Plot Sample\\PlotSample.bmp",
               "RelativeDocumentMoniker": "Plot Sample\\PlotSample.bmp",
               "ToolTip": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Plot Sample\\PlotSample.bmp -  [English (United States)] - Bitmap [42x42, 4 bit, BMP]",
               "RelativeToolTip": "Plot Sample\\PlotSample.bmp -  [English (United States)] - Bitmap [42x42, 4 bit, BMP]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001533|",
-              "WhenOpened": "2026-03-09T11:58:51.91Z",
-              "EditorCaption": " -  [English (United States)] - Bitmap [42x42, 4 bit, BMP]"
+              "WhenOpened": "2026-03-09T12:30:03.064Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "AsynAcquireSample.xaml",
               "DocumentMoniker": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Acquire Async Sample\\AsynAcquireSample.xaml",
               "RelativeDocumentMoniker": "Acquire Async Sample\\AsynAcquireSample.xaml",
               "ToolTip": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Acquire Async Sample\\AsynAcquireSample.xaml",
               "RelativeToolTip": "Acquire Async Sample\\AsynAcquireSample.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-03-09T11:54:29.221Z",
+              "WhenOpened": "2026-03-09T12:30:03.066Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "AsynAcquireSample.xaml.cs",
               "DocumentMoniker": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Acquire Async Sample\\AsynAcquireSample.xaml.cs",
               "RelativeDocumentMoniker": "Acquire Async Sample\\AsynAcquireSample.xaml.cs",
               "ToolTip": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Acquire Async Sample\\AsynAcquireSample.xaml.cs",
               "RelativeToolTip": "Acquire Async Sample\\AsynAcquireSample.xaml.cs",
               "ViewState": "AgIAABEAAAAAAAAAAAAQwBcAAAAPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-09T11:54:10.173Z",
-              "EditorCaption": ""
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001384|",
+              "WhenOpened": "2026-03-09T12:30:03.067Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "LightFieldCSharpAddInSamples",
-              "DocumentMoniker": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\LightFieldCSharpAddInSamples.csproj",
-              "RelativeDocumentMoniker": "LightFieldCSharpAddInSamples.csproj",
-              "ToolTip": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\LightFieldCSharpAddInSamples.csproj",
-              "RelativeToolTip": "LightFieldCSharpAddInSamples.csproj",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-03-09T11:47:54.777Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "AcquireAsyncSample.cs",
               "DocumentMoniker": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Acquire Async Sample\\AcquireAsyncSample.cs",
               "RelativeDocumentMoniker": "Acquire Async Sample\\AcquireAsyncSample.cs",
@@ -110,8 +107,7 @@
               "RelativeToolTip": "Acquire Async Sample\\AcquireAsyncSample.cs",
               "ViewState": "AgIAAAEAAAAAAAAAAAAWwBYAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-09T11:47:30.307Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-09T12:30:03.068Z"
             }
           ]
         }

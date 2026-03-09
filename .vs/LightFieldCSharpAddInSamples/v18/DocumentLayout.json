@@ -7,7 +7,7 @@
       "RelativeMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|solutionrelative:bap_lab_simplemultipointspectroscope\\simplemultipointspectroscopeaddin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|c:\\users\\fatima.bajwa\\desktop\\umar\\pycontrol-master\\manual\\lightfield\\add-in and automation sdk\\samples\\csharp add-ins\\plot sample\\plotsample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\plot sample\\plotsample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C47B81EB-EE07-488A-A645-0CC8C31D678C}|LightFieldCSharpAddInSamples.csproj|solutionrelative:plot sample\\plotsample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -44,9 +44,9 @@
               "RelativeDocumentMoniker": "BAP_Lab_SimpleMultipointSpectroscope\\SimpleMultipointSpectroscopeAddin.cs",
               "ToolTip": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\BAP_Lab_SimpleMultipointSpectroscope\\SimpleMultipointSpectroscopeAddin.cs",
               "RelativeToolTip": "BAP_Lab_SimpleMultipointSpectroscope\\SimpleMultipointSpectroscopeAddin.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAyAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABAAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-09T12:37:07.884Z",
+              "WhenOpened": "2026-03-09T12:37:16.349Z",
               "EditorCaption": ""
             },
             {
@@ -59,8 +59,7 @@
               "RelativeToolTip": "Plot Sample\\PlotSample.cs",
               "ViewState": "AgIAAGoAAAAAAAAAAAAawHMAAAA3AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-09T12:30:03.058Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-09T12:37:16.354Z"
             },
             {
               "$type": "Document",
@@ -71,7 +70,7 @@
               "ToolTip": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Plot Sample\\PlotSample.bmp -  [English (United States)] - Bitmap [42x42, 4 bit, BMP]",
               "RelativeToolTip": "Plot Sample\\PlotSample.bmp -  [English (United States)] - Bitmap [42x42, 4 bit, BMP]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001533|",
-              "WhenOpened": "2026-03-09T12:30:03.064Z"
+              "WhenOpened": "2026-03-09T12:37:16.355Z"
             },
             {
               "$type": "Document",
@@ -82,8 +81,7 @@
               "ToolTip": "C:\\Users\\fatima.bajwa\\Desktop\\umar\\pyControl-master\\Manual\\LightField\\Add-in and Automation SDK\\Samples\\CSharp Add-Ins\\Acquire Async Sample\\AsynAcquireSample.xaml",
               "RelativeToolTip": "Acquire Async Sample\\AsynAcquireSample.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-03-09T12:30:03.066Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-09T12:37:16.356Z"
             },
             {
               "$type": "Document",
@@ -95,7 +93,7 @@
               "RelativeToolTip": "Acquire Async Sample\\AsynAcquireSample.xaml.cs",
               "ViewState": "AgIAABEAAAAAAAAAAAAQwBcAAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001384|",
-              "WhenOpened": "2026-03-09T12:30:03.067Z"
+              "WhenOpened": "2026-03-09T12:37:16.357Z"
             },
             {
               "$type": "Document",
@@ -107,7 +105,7 @@
               "RelativeToolTip": "Acquire Async Sample\\AcquireAsyncSample.cs",
               "ViewState": "AgIAAAEAAAAAAAAAAAAWwBYAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-09T12:30:03.068Z"
+              "WhenOpened": "2026-03-09T12:37:16.358Z"
             }
           ]
         }

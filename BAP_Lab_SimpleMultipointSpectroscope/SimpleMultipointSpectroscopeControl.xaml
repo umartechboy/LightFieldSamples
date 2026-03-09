@@ -4,203 +4,316 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="700" d:DesignWidth="340">
+             d:DesignHeight="800" d:DesignWidth="400">
 
-    <StackPanel Margin="8" Width="320">
+    <Grid>
+        <TabControl Name="MainTabControl" Margin="4">
+            <!-- ======================================================= -->
+            <!-- TAB 1: SETUP                                            -->
+            <!-- ======================================================= -->
+            <TabItem Header="Setup">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid Margin="8" HorizontalAlignment="Left" MinWidth="700">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="360"/>
+                            <ColumnDefinition Width="360"/>
+                        </Grid.ColumnDefinitions>
 
-        <!-- ======================================================= -->
-        <!-- SECTION A  -  Serial Port                               -->
-        <!-- ======================================================= -->
-        <GroupBox Header="Serial Port (Stage Controller)" Margin="0,0,0,8">
-            <Grid Margin="4">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="80"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="80"/>
-                </Grid.ColumnDefinitions>
+                        <!-- LEFT COLUMN -->
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <!-- Image Acquisition Settings -->
+                            <GroupBox Header="Image Acquisition Settings" Margin="0,0,0,8">
+                                <StackPanel Margin="4">
+                                    <Label Content="Region of Interest" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                                    <RadioButton Name="FullChip" Content="Full Chip" IsChecked="True" Margin="4,2,0,2" Checked="FullChip_Checked"/>
+                                    <RadioButton Name="FullSensorBinned" Content="Full Sensor, Binned" Margin="4,2,0,2" Checked="FullSensorBinned_Checked"/>
+                                    <Grid Name="BinningPanel" Margin="20,2,0,2" Visibility="Collapsed">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="70"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="70"/>
+                                            <ColumnDefinition Width="50"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="Bin Width:"/>
+                                        <TextBox Grid.Column="1" Name="BinWidth" Text="1" TextChanged="BinWidth_TextChanged"/>
+                                        <Label Grid.Column="2" Content="Bin Height:"/>
+                                        <TextBox Grid.Column="3" Name="BinHeight" Text="1" TextChanged="BinHeight_TextChanged"/>
+                                    </Grid>
+                                    <RadioButton Name="CustomRegion" Content="Custom Region of Interest" Margin="4,2,0,2" Checked="CustomRegion_Checked"/>
+                                    <Grid Name="CustomRoiPanel" Margin="20,2,0,2" Visibility="Collapsed">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="60"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="X:"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Name="RoiX" Text="0" TextChanged="RoiX_TextChanged"/>
+                                        <Label Grid.Row="0" Grid.Column="2" Content="Y:"/>
+                                        <TextBox Grid.Row="0" Grid.Column="3" Name="RoiY" Text="0" TextChanged="RoiY_TextChanged"/>
+                                        <Label Grid.Row="1" Grid.Column="0" Content="W:"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Name="RoiWidth" Text="100" TextChanged="RoiWidth_TextChanged"/>
+                                        <Label Grid.Row="1" Grid.Column="2" Content="H:"/>
+                                        <TextBox Grid.Row="1" Grid.Column="3" Name="RoiHeight" Text="100" TextChanged="RoiHeight_TextChanged"/>
+                                        <Label Grid.Row="2" Grid.Column="0" Content="XBin:"/>
+                                        <TextBox Grid.Row="2" Grid.Column="1" Name="RoiXBin" Text="1" TextChanged="RoiXBin_TextChanged"/>
+                                        <Label Grid.Row="2" Grid.Column="2" Content="YBin:"/>
+                                        <TextBox Grid.Row="2" Grid.Column="3" Name="RoiYBin" Text="1" TextChanged="RoiYBin_TextChanged"/>
+                                    </Grid>
+                                    <Separator Margin="0,6,0,6"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="110"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="Exposure (ms):" VerticalAlignment="Center"/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Name="ExposureMs" Text="100" Margin="0,2,0,2"/>
+                                        <Label Grid.Row="1" Grid.Column="0" Content="Frames:" VerticalAlignment="Center"/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Name="FramesBox" Text="1" Margin="0,2,0,2"/>
+                                    </Grid>
+                                    <Separator Margin="0,6,0,6"/>
+                                    <Button Name="TestAcquireButton" Content="Test Acquire Image" Height="28" Margin="0,0,0,4" Click="TestAcquireButton_Click"/>
+                                    <TextBlock Name="AcqStatusText" Text="" Foreground="DarkGreen" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                                    
+                                    <Border BorderBrush="Gray" BorderThickness="1" Background="Black" Height="150" Margin="0,8,0,0">
+                                        <Image Name="SetupImageControl" Stretch="Uniform"/>
+                                    </Border>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
 
-                <!-- Port combo -->
-                <Label Grid.Row="0" Grid.Column="0" Content="COM Port:" VerticalAlignment="Center"/>
-                <ComboBox Grid.Row="0" Grid.Column="1"
-                          Name="PortCombo"
-                          Margin="4,4,4,4"
-                          VerticalAlignment="Center"
-                          IsReadOnly="True"/>
-                <Button Grid.Row="0" Grid.Column="2"
-                        Name="RefreshPortsButton"
-                        Content="Refresh"
-                        Margin="0,4,0,4"
-                        Click="RefreshPorts_Click"/>
+                        <!-- RIGHT COLUMN -->
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <!-- Serial Port -->
+                            <GroupBox Header="Serial Port (Stage Controller)" Margin="0,0,0,8">
+                                <Grid Margin="4">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="85"/>
+                                    </Grid.ColumnDefinitions>
 
-                <!-- Baud rate -->
-                <Label Grid.Row="1" Grid.Column="0" Content="Baud Rate:" VerticalAlignment="Center"/>
-                <ComboBox Grid.Row="1" Grid.Column="1"
-                          Name="BaudCombo"
-                          Margin="4,2,4,2"
-                          VerticalAlignment="Center">
-                    <ComboBoxItem Content="9600"/>
-                    <ComboBoxItem Content="19200"/>
-                    <ComboBoxItem Content="38400"/>
-                    <ComboBoxItem Content="57600"/>
-                    <ComboBoxItem IsSelected="True" Content="115200"/>
-                    <ComboBoxItem Content="250000"/>
-                </ComboBox>
+                                    <Label Grid.Row="0" Grid.Column="0" Content="COM Port:" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Row="0" Grid.Column="1" Name="PortCombo" Margin="4" IsReadOnly="True"/>
+                                    <Button Grid.Row="0" Grid.Column="2" Name="RefreshPortsButton" Content="Refresh" Margin="0,4,0,4" Click="RefreshPorts_Click"/>
 
-                <!-- Status -->
-                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
-                           Name="SerialStatusText"
-                           Text="Status: no port selected"
-                           Foreground="Gray"
-                           Margin="4,6,4,2"/>
-            </Grid>
-        </GroupBox>
+                                    <Label Grid.Row="1" Grid.Column="0" Content="Baud Rate:" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="1" Name="BaudCombo" Margin="4,2,4,2">
+                                        <ComboBoxItem Content="9600"/>
+                                        <ComboBoxItem Content="19200"/>
+                                        <ComboBoxItem Content="38400"/>
+                                        <ComboBoxItem Content="57600"/>
+                                        <ComboBoxItem IsSelected="True" Content="115200"/>
+                                        <ComboBoxItem Content="250000"/>
+                                    </ComboBox>
+                                    
+                                    <Button Grid.Row="1" Grid.Column="2" Name="ConnectButton" Content="Connect" Margin="0,2,0,2" Click="ConnectButton_Click"/>
 
-        <!-- ======================================================= -->
-        <!-- SECTION B  -  Image Acquisition                         -->
-        <!-- ======================================================= -->
-        <GroupBox Header="Image Acquisition" Margin="0,0,0,8">
-            <StackPanel Margin="4">
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Name="SerialStatusText" Text="Status: disconnected" Foreground="Gray" Margin="4,6,4,2"/>
+                                    
+                                    <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="60" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0" Name="ManualCommandBox" Margin="0,0,4,0" KeyDown="ManualCommandBox_KeyDown"/>
+                                        <Button Grid.Column="1" Name="SendCmdButton" Content="Send" Click="SendCmdButton_Click"/>
+                                    </Grid>
+                                </Grid>
+                            </GroupBox>
 
-                <!-- ROI mode -->
-                <Label Content="Region of Interest" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                            <!-- Terminal -->
+                            <GroupBox Header="Terminal Log" Margin="0,0,0,8">
+                                <TextBox Name="TerminalText" Height="100" IsReadOnly="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" FontFamily="Consolas" Margin="4"/>
+                            </GroupBox>
 
-                <RadioButton Name="FullChip"
-                             Content="Full Chip"
-                             IsChecked="True"
-                             Margin="4,2,0,2"
-                             Checked="FullChip_Checked"/>
+                            <!-- Coordinates & Homing -->
+                            <GroupBox Header="Coordinates &amp; Homing" Margin="0,0,0,8">
+                                <StackPanel Margin="4">
+                                    <WrapPanel Margin="0,0,0,4">
+                                        <Button Content="Home XY (G28 X Y)" Width="120" Margin="0,0,4,4" Click="HomeXY_Click"/>
+                                        <Button Content="Home Z (G28 Z)" Width="110" Margin="0,0,4,4" Click="HomeZ_Click"/>
+                                        <Button Content="Set Origin (G92)" Width="110" Margin="0,0,0,4" Click="SetOrigin_Click"/>
+                                        <Button Content="Save EEPROM (M500)" Width="130" Margin="0,0,4,4" Click="SaveEEPROM_Click"/>
+                                    </WrapPanel>
+                                    <Grid Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="Current Pos:" FontWeight="SemiBold"/>
+                                        <TextBlock Grid.Column="1" Name="CurrentPosText" Text="X: 0.00  Y: 0.00  Z: 0.00" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                    </Grid>
+                                </StackPanel>
+                            </GroupBox>
 
-                <RadioButton Name="FullSensorBinned"
-                             Content="Full Sensor, Binned"
-                             Margin="4,2,0,2"
-                             Checked="FullSensorBinned_Checked"/>
+                            <!-- Manual Movement -->
+                            <GroupBox Header="Manual Move" Margin="0,0,0,8">
+                                <StackPanel Margin="4">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <Label Content="Step Size:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <RadioButton Name="MoveStepCoarse" Content="1 mm" IsChecked="True" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <RadioButton Name="MoveStepFine" Content="0.1 mm" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <RadioButton Name="MoveStepSuperFine" Content="0.01 mm" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+                                        <Label Content="Feed Rate:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBox Name="MoveFeedRate" Text="3000" Width="60" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    </StackPanel>
+                                    <WrapPanel Margin="0,4,0,0">
+                                        <Button Content="X-" Width="40" Margin="0,0,4,4" Click="MoveXMinus_Click"/>
+                                        <Button Content="X+" Width="40" Margin="0,0,12,4" Click="MoveXPlus_Click"/>
+                                        <Button Content="Y-" Width="40" Margin="0,0,4,4" Click="MoveYMinus_Click"/>
+                                        <Button Content="Y+" Width="40" Margin="0,0,12,4" Click="MoveYPlus_Click"/>
+                                        <Button Content="Z-" Width="40" Margin="0,0,4,4" Click="MoveZMinus_Click"/>
+                                        <Button Content="Z+" Width="40" Margin="0,0,4,4" Click="MoveZPlus_Click"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
 
-                <!-- Binning sub-fields (shown when FullSensorBinned is checked) -->
-                <Grid Name="BinningPanel" Margin="20,2,0,2" Visibility="Collapsed">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70"/>
-                        <ColumnDefinition Width="50"/>
-                        <ColumnDefinition Width="70"/>
-                        <ColumnDefinition Width="50"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Grid.Column="0" Content="Bin Width:"/>
-                    <TextBox Grid.Column="1" Name="BinWidth" Text="1"
-                             TextChanged="BinWidth_TextChanged"/>
-                    <Label Grid.Column="2" Content="Bin Height:"/>
-                    <TextBox Grid.Column="3" Name="BinHeight" Text="1"
-                             TextChanged="BinHeight_TextChanged"/>
-                </Grid>
+            <!-- ======================================================= -->
+            <!-- TAB 2: PROCESS                                          -->
+            <!-- ======================================================= -->
+            <TabItem Header="Process">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid Margin="8" HorizontalAlignment="Left" MinWidth="700">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="360"/>
+                            <ColumnDefinition Width="360"/>
+                        </Grid.ColumnDefinitions>
 
-                <RadioButton Name="CustomRegion"
-                             Content="Custom Region of Interest"
-                             Margin="4,2,0,2"
-                             Checked="CustomRegion_Checked"/>
+                        <!-- LEFT COLUMN -->
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <!-- Grid Configuration -->
+                            <GroupBox Header="Grid Configuration" Margin="0,0,0,8">
+                                <Grid Margin="4">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                <!-- Custom ROI sub-fields (shown when CustomRegion is checked) -->
-                <Grid Name="CustomRoiPanel" Margin="20,2,0,2" Visibility="Collapsed">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="40"/>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="40"/>
-                        <ColumnDefinition Width="60"/>
-                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Row="0" Grid.Column="0" Content="X Points:" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Name="GridXPoints" Text="3" Margin="0,2,0,2"/>
 
-                    <Label   Grid.Row="0" Grid.Column="0" Content="X:"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" Name="RoiX" Text="0"
-                             TextChanged="RoiX_TextChanged"/>
-                    <Label   Grid.Row="0" Grid.Column="2" Content="Y:"/>
-                    <TextBox Grid.Row="0" Grid.Column="3" Name="RoiY" Text="0"
-                             TextChanged="RoiY_TextChanged"/>
+                                    <Label Grid.Row="1" Grid.Column="0" Content="Y Points:" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Name="GridYPoints" Text="3" Margin="0,2,0,2"/>
 
-                    <Label   Grid.Row="1" Grid.Column="0" Content="W:"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Name="RoiWidth" Text="100"
-                             TextChanged="RoiWidth_TextChanged"/>
-                    <Label   Grid.Row="1" Grid.Column="2" Content="H:"/>
-                    <TextBox Grid.Row="1" Grid.Column="3" Name="RoiHeight" Text="100"
-                             TextChanged="RoiHeight_TextChanged"/>
+                                    <Label Grid.Row="2" Grid.Column="0" Content="X Step (mm):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Name="GridXStep" Text="1.0" Margin="0,2,0,2"/>
 
-                    <Label   Grid.Row="2" Grid.Column="0" Content="XBin:"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Name="RoiXBin" Text="1"
-                             TextChanged="RoiXBin_TextChanged"/>
-                    <Label   Grid.Row="2" Grid.Column="2" Content="YBin:"/>
-                    <TextBox Grid.Row="2" Grid.Column="3" Name="RoiYBin" Text="1"
-                             TextChanged="RoiYBin_TextChanged"/>
-                </Grid>
+                                    <Label Grid.Row="3" Grid.Column="0" Content="Y Step (mm):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Name="GridYStep" Text="1.0" Margin="0,2,0,2"/>
 
-                <Separator Margin="0,6,0,6"/>
+                                    <Label Grid.Row="4" Grid.Column="0" Content="Dwell (ms):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="4" Grid.Column="1" Name="GridDwellMs" Text="500" Margin="0,2,0,2"/>
+                                </Grid>
+                            </GroupBox>
 
-                <!-- Acquisition parameters -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="110"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                            <!-- Go To Manual Position -->
+                            <GroupBox Header="Go To Location" Margin="0,0,0,8">
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="70" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="X:" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="1" Name="GoToX" Text="0.0" Margin="2,0,8,0" VerticalAlignment="Center"/>
+                                    <Label Grid.Column="2" Content="Y:" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="3" Name="GoToY" Text="0.0" Margin="2,0,8,0" VerticalAlignment="Center"/>
+                                    <Button Grid.Column="4" Name="GoToButton" Content="Go To" Click="GoToButton_Click"/>
+                                </Grid>
+                            </GroupBox>
+                        </StackPanel>
 
-                    <Label Grid.Row="0" Grid.Column="0"
-                           Content="Exposure (ms):" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="0" Grid.Column="1"
-                             Name="ExposureMs" Text="100" Margin="0,2,0,2"/>
+                        <!-- RIGHT COLUMN -->
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <!-- Scan Control -->
+                            <GroupBox Header="Scan Control" Margin="0,0,0,8">
+                                <StackPanel Margin="4">
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" Name="StartScanButton" Content="Start Scan" Height="30" Margin="0,0,4,0" Click="StartScanButton_Click" Background="LightGreen"/>
+                                        <Button Grid.Column="1" Name="StopScanButton" Content="Stop Scan" Height="30" Margin="4,0,0,0" IsEnabled="False" Click="StopScanButton_Click" Background="LightCoral"/>
+                                    </Grid>
+                                    <ProgressBar Name="ScanProgressBar" Height="20" Minimum="0" Maximum="100" Value="0"/>
+                                    <TextBlock Name="ScanStatusText" Text="Ready" Margin="0,4,0,0" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </GroupBox>
 
-                    <Label Grid.Row="1" Grid.Column="0"
-                           Content="Frames:" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="1" Grid.Column="1"
-                             Name="FramesBox" Text="1" Margin="0,2,0,2"/>
-                </Grid>
+                            <!-- Live Image View -->
+                            <GroupBox Header="Live Image Check" Margin="0,0,0,8" VerticalAlignment="Stretch">
+                                <StackPanel Margin="4">
+                                    <Border BorderBrush="Gray" BorderThickness="1" Background="Black" Height="265">
+                                        <Image Name="LiveImageControl" Stretch="Uniform"/>
+                                    </Border>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
 
-                <Separator Margin="0,6,0,6"/>
+            <!-- ======================================================= -->
+            <!-- TAB 3: EXPORT                                           -->
+            <!-- ======================================================= -->
+            <TabItem Header="Export">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="8" Width="360" HorizontalAlignment="Left">
+                        
+                        <!-- Output Folder -->
+                        <GroupBox Header="Output Folder" Margin="0,0,0,8">
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="80" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Name="OutputFolderText" Margin="0,0,4,0" VerticalAlignment="Center" IsReadOnly="True" />
+                                <Button Grid.Column="1" Name="BrowseFolderButton" Content="Browse..." Click="BrowseFolderButton_Click"/>
+                            </Grid>
+                        </GroupBox>
 
-                <!-- Action buttons -->
-                <Button Name="AcquireButton"
-                        Content="Acquire Image"
-                        Height="28"
-                        Margin="0,0,0,4"
-                        Click="AcquireButton_Click"/>
-
-                <Button Name="SavePngButton"
-                        Content="Save Last Image as PNG..."
-                        Height="28"
-                        IsEnabled="False"
-                        Click="SavePng_Click"/>
-
-                <!-- Acquisition status -->
-                <TextBlock Name="AcqStatusText"
-                           Text=""
-                           Foreground="DarkGreen"
-                           Margin="0,6,0,0"
-                           TextWrapping="Wrap"/>
-            </StackPanel>
-        </GroupBox>
-
-        <!-- ======================================================= -->
-        <!-- SECTION C  -  Sample list                               -->
-        <!-- ======================================================= -->
-        <GroupBox Header="Acquired Samples">
-            <StackPanel>
-                <ListBox Name="SamplesListBox"
-                         Height="120"
-                         Margin="4"/>
-                <Button Name="ClearListButton"
-                        Content="Clear List"
-                        Width="80"
-                        HorizontalAlignment="Right"
-                        Margin="0,2,4,4"
-                        Click="ClearList_Click"/>
-            </StackPanel>
-        </GroupBox>
-
-    </StackPanel>
+                        <GroupBox Header="Export Actions" Margin="0,0,0,8">
+                            <StackPanel Margin="4">
+                                <Button Name="ExportBothButton" Content="Export PNGs &amp; JSON" Height="30" Margin="0,0,0,8" Click="ExportBothButton_Click"/>
+                                <TextBlock Name="ExportStatusText" Text="Wait for scan to complete." Foreground="Gray"/>
+                            </StackPanel>
+                        </GroupBox>
+                        
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </Grid>
 </UserControl>

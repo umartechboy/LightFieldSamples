@@ -82,6 +82,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BAP_Lab_SimpleMultipointSpectroscope\MarlinDriver.cs" />
     <Compile Include="BAP_Lab_SimpleMultipointSpectroscope\SimpleMultipointSpectroscopeAddin.cs" />
     <Compile Include="BAP_Lab_SimpleMultipointSpectroscope\SimpleMultipointSpectroscopeControl.xaml.cs">
       <DependentUpon>SimpleMultipointSpectroscopeControl.xaml</DependentUpon>
