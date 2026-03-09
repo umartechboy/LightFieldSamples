@@ -1,0 +1,20 @@
+﻿LightFieldCSharpAddInSamples
+
+
+library
+C#
+.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\
+LightFieldCSharpAddInSamples
+none
+false
+DEBUG;TRACE
+
+12-1882581447
+
+33815804086
+18195263459
+BAP_Lab_SimpleMultipointSpectroscope\SimpleMultipointSpectroscopeControl.xaml;Acquire Async Sample\AsynAcquireSample.xaml;Acquire Sync Sample\AcquireSyncSample.xaml;Composite Sample\ExperimentView.xaml;Control Gallery Sample\ControlGallerySample.xaml;Dialog Sample\DialogSampleWindow.xaml;Display Controls Sample\DisplayControlsSample.xaml;Export Sample\ExportSample.xaml;Metadata Sample\MetadataSample.xaml;Regions Of Interest Sample\RegionControl.xaml;System Building Sample\SystemBuildingSampleControl.xaml;Viewer Sample\ViewerSample.xaml;
+
+False
+

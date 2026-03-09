@@ -1,0 +1,33 @@
+C:\Program Files\Princeton Instruments\LightField\AddIns\LightFieldCSharpAddInSamples\LightFieldCSharpAddInSamples.dll
+C:\Program Files\Princeton Instruments\LightField\AddIns\LightFieldCSharpAddInSamples\LightFieldCSharpAddInSamples.pdb
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\LightFieldCSharpAddInSamples.csproj.AssemblyReference.cache
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Acquire Async Sample\AsynAcquireSample.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Acquire Sync Sample\AcquireSyncSample.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Composite Sample\ExperimentView.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Control Gallery Sample\ControlGallerySample.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Dialog Sample\DialogSampleWindow.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Display Controls Sample\DisplayControlsSample.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Export Sample\ExportSample.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Metadata Sample\MetadataSample.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Regions Of Interest Sample\RegionControl.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\System Building Sample\SystemBuildingSampleControl.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Viewer Sample\ViewerSample.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Acquire Async Sample\AsynAcquireSample.g.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Acquire Sync Sample\AcquireSyncSample.g.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Composite Sample\ExperimentView.g.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Control Gallery Sample\ControlGallerySample.g.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Dialog Sample\DialogSampleWindow.g.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Display Controls Sample\DisplayControlsSample.g.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Export Sample\ExportSample.g.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Metadata Sample\MetadataSample.g.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Regions Of Interest Sample\RegionControl.g.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\System Building Sample\SystemBuildingSampleControl.g.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\Viewer Sample\ViewerSample.g.cs
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\LightFieldCSharpAddInSamples_MarkupCompile.cache
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\LightFieldCSharpAddInSamples.g.resources
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\LightFieldCSharpAddInSamples.csproj.CoreCompileInputs.cache
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\LightFie.FE4CBCEF.Up2Date
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\LightFieldCSharpAddInSamples.dll
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\LightFieldCSharpAddInSamples.pdb
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\BAP_Lab_SimpleMultipointSpectroscope\SimpleMultipointSpectroscopeControl.baml
+C:\Users\fatima.bajwa\Desktop\umar\pyControl-master\Manual\LightField\Add-in and Automation SDK\Samples\CSharp Add-Ins\obj\x64\Debug\BAP_Lab_SimpleMultipointSpectroscope\SimpleMultipointSpectroscopeControl.g.cs
