@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Ports;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,11 +16,25 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 using PrincetonInstruments.LightField.AddIns;
 
 namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
 {
+    public class ScanPointUI : INotifyPropertyChanged
+    {
+        private int _index;
+        private double _x;
+        private double _y;
+        
+        public int Index { get { return _index; } set { _index = value; OnPropertyChanged(nameof(Index)); } }
+        public double X { get { return _x; } set { _x = value; OnPropertyChanged(nameof(X)); } }
+        public double Y { get { return _y; } set { _y = value; OnPropertyChanged(nameof(Y)); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
     public partial class SimpleMultipointSpectroscopeControl : UserControl
     {
         // ── LightField interfaces ──────────────────────────────────────────────
@@ -27,7 +46,8 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
         private IImageDataSet _lastDataSet;
         private bool _controlsReady = false;
 
-        // ── Scan State ─────────────────────────────────────────────────────────
+        // ── Grid Object State ──────────────────────────────────────────────────
+        private ObservableCollection<ScanPointUI> _gridPoints;
         private CancellationTokenSource _scanCts;
         private readonly List<ScanPointRecord> _scanRecords = new List<ScanPointRecord>();
 
@@ -53,7 +73,11 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             RefreshPorts();
             
             // Set default output folder to My Documents
-            OutputFolderText.Text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BAP_Lab_Export");
+            OutputFolderText.Text = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BAP_Lab_Export");
+
+            _gridPoints = new ObservableCollection<ScanPointUI>();
+            _gridPoints.CollectionChanged += GridPoints_CollectionChanged;
+            GridPointsDataGrid.ItemsSource = _gridPoints;
 
             _controlsReady = true;
             InitBlackPreview();
@@ -149,6 +173,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
         private void UpdatePosUI()
         {
             CurrentPosText.Text = $"X: {_marlin.CurrentX:F2}  Y: {_marlin.CurrentY:F2}  Z: {_marlin.CurrentZ:F2}";
+            DrawGridPreview();
         }
 
         private void HomeXY_Click(object sender, RoutedEventArgs e) { _marlin.HomeXY(); UpdatePosUI(); }
@@ -253,39 +278,337 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
         }
 
         // ═══════════════════════════════════════════════════════════════════════
-        //  TAB 2: PROCESS (Scan Loop)
+        //  TAB 2: PROCESS (Grid & Scan)
         // ═══════════════════════════════════════════════════════════════════════
 
-        private void GoToButton_Click(object sender, RoutedEventArgs e)
+        private void GridPoints_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (!_marlin.IsConnected) { MessageBox.Show("Connect Marlin first."); return; }
-            if (double.TryParse(GoToX.Text, out double x) && double.TryParse(GoToY.Text, out double y))
+            for (int i = 0; i < _gridPoints.Count; i++) _gridPoints[i].Index = i + 1;
+
+            if (e.OldItems != null)
+                foreach (INotifyPropertyChanged item in e.OldItems) item.PropertyChanged -= GridPoint_PropertyChanged;
+            if (e.NewItems != null)
+                foreach (INotifyPropertyChanged item in e.NewItems) item.PropertyChanged += GridPoint_PropertyChanged;
+
+            DrawGridPreview();
+        }
+
+        private void GridPoint_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "X" || e.PropertyName == "Y") DrawGridPreview();
+        }
+
+        private string ReadJsonString(string content, string key)
+        {
+            var match = Regex.Match(content, $"\\\"{key}\\\"\\s*:\\s*\\\"(.*?)\\\"");
+            return match.Success ? match.Groups[1].Value : null;
+        }
+
+        private void LoadGridButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
             {
-                _marlin.MoveXY(x, y, GetFeedRate());
-                UpdatePosUI();
+                Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*",
+                Title = "Load Grid Configuration"
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                try
+                {
+                    string content = File.ReadAllText(dlg.FileName);
+                    
+                    // Parse Configuration
+                    string xp = ReadJsonString(content, "XPoints"); if (xp != null) GridXPoints.Text = xp;
+                    string yp = ReadJsonString(content, "YPoints"); if (yp != null) GridYPoints.Text = yp;
+                    string xs = ReadJsonString(content, "XStep"); if (xs != null) GridXStep.Text = xs;
+                    string ys = ReadJsonString(content, "YStep"); if (ys != null) GridYStep.Text = ys;
+                    string dwell = ReadJsonString(content, "DwellMs"); if (dwell != null) GridDwellMs.Text = dwell;
+                    
+                    string pattern = ReadJsonString(content, "Pattern");
+                    if (pattern != null)
+                    {
+                        foreach (ComboBoxItem item in GridPatternCombo.Items)
+                        {
+                            if (item.Content as string == pattern)
+                            {
+                                GridPatternCombo.SelectedItem = item;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    string stag = ReadJsonString(content, "Staggered");
+                    if (stag != null && bool.TryParse(stag, out bool bStag)) StaggeredCheck.IsChecked = bStag;
+
+                    // Parse Points
+                    var matches = Regex.Matches(content, @"\""X\""\s*:\s*([-0-9.]+)\s*,\s*\""Y\""\s*:\s*([-0-9.]+)");
+                    
+                    if (matches.Count > 0)
+                    {
+                        _gridPoints.Clear();
+                        foreach (Match m in matches)
+                        {
+                            if (double.TryParse(m.Groups[1].Value, out double x) && double.TryParse(m.Groups[2].Value, out double y))
+                            {
+                                _gridPoints.Add(new ScanPointUI { X = x, Y = y });
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("No valid coordinate data found in file.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to load JSON: " + ex.Message);
+                }
+            }
+        }
+
+        private void SaveGridButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_gridPoints.Count == 0)
+            {
+                MessageBox.Show("No points in grid to save.");
+                return;
+            }
+
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*",
+                Title = "Save Grid Configuration",
+                FileName = $"GridConfig_{DateTime.Now:yyyyMMdd_HHmm}.json"
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                try
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine("{");
+                    
+                    // Config Block
+                    sb.AppendLine("  \"Config\": {");
+                    sb.AppendLine($"    \"XPoints\": \"{GridXPoints.Text}\",");
+                    sb.AppendLine($"    \"YPoints\": \"{GridYPoints.Text}\",");
+                    sb.AppendLine($"    \"XStep\": \"{GridXStep.Text}\",");
+                    sb.AppendLine($"    \"YStep\": \"{GridYStep.Text}\",");
+                    sb.AppendLine($"    \"DwellMs\": \"{GridDwellMs.Text}\",");
+                    sb.AppendLine($"    \"Pattern\": \"{(GridPatternCombo.SelectedItem as ComboBoxItem)?.Content}\",");
+                    sb.AppendLine($"    \"Staggered\": \"{StaggeredCheck.IsChecked == true}\"");
+                    sb.AppendLine("  },");
+
+                    // Points Block
+                    sb.AppendLine("  \"Points\": [");
+                    for (int i = 0; i < _gridPoints.Count; i++)
+                    {
+                        sb.AppendLine("    {");
+                        sb.AppendLine($"      \"X\": {_gridPoints[i].X},");
+                        sb.AppendLine($"      \"Y\": {_gridPoints[i].Y}");
+                        sb.Append("    }");
+                        if (i < _gridPoints.Count - 1) sb.Append(",");
+                        sb.AppendLine();
+                    }
+                    sb.AppendLine("  ]");
+                    sb.AppendLine("}");
+
+                    File.WriteAllText(dlg.FileName, sb.ToString());
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to save JSON: " + ex.Message);
+                }
+            }
+        }
+
+        private void GeneratePatternButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!int.TryParse(GridXPoints.Text, out int cols) || cols < 1) return;
+            if (!int.TryParse(GridYPoints.Text, out int rows) || rows < 1) return;
+            if (!double.TryParse(GridXStep.Text, out double xStep) || xStep <= 0) return;
+            if (!double.TryParse(GridYStep.Text, out double yStep) || yStep <= 0) return;
+
+            string pattern = (GridPatternCombo.SelectedItem as ComboBoxItem)?.Content as string ?? "Row-by-Row";
+            bool staggered = StaggeredCheck.IsChecked == true;
+
+            var points = new List<Point>();
+
+            if (pattern == "Row-by-Row")
+            {
+                for (int y = 0; y < rows; y++)
+                {
+                    double xOffset = (staggered && y % 2 != 0) ? xStep / 2.0 : 0;
+                    for (int x = 0; x < cols; x++) points.Add(new Point(x * xStep + xOffset, y * yStep));
+                }
+            }
+            else if (pattern == "Column-by-Column")
+            {
+                for (int x = 0; x < cols; x++)
+                {
+                    double yOffset = (staggered && x % 2 != 0) ? yStep / 2.0 : 0;
+                    for (int y = 0; y < rows; y++) points.Add(new Point(x * xStep, y * yStep + yOffset));
+                }
+            }
+            else if (pattern == "Serpentine Row")
+            {
+                for (int y = 0; y < rows; y++)
+                {
+                    double xOffset = (staggered && y % 2 != 0) ? xStep / 2.0 : 0;
+                    if (y % 2 == 0)
+                    {
+                        for (int x = 0; x < cols; x++) points.Add(new Point(x * xStep + xOffset, y * yStep));
+                    }
+                    else
+                    {
+                        for (int x = cols - 1; x >= 0; x--) points.Add(new Point(x * xStep + xOffset, y * yStep));
+                    }
+                }
+            }
+            else if (pattern == "Serpentine Column")
+            {
+                for (int x = 0; x < cols; x++)
+                {
+                    double yOffset = (staggered && x % 2 != 0) ? yStep / 2.0 : 0;
+                    if (x % 2 == 0)
+                    {
+                        for (int y = 0; y < rows; y++) points.Add(new Point(x * xStep, y * yStep + yOffset));
+                    }
+                    else
+                    {
+                        for (int y = rows - 1; y >= 0; y--) points.Add(new Point(x * xStep, y * yStep + yOffset));
+                    }
+                }
+            }
+
+            // Center all points around (0,0)
+            if (points.Count > 0)
+            {
+                double minX = points.Min(p => p.X);
+                double maxX = points.Max(p => p.X);
+                double minY = points.Min(p => p.Y);
+                double maxY = points.Max(p => p.Y);
+                double cx = (minX + maxX) / 2.0;
+                double cy = (minY + maxY) / 2.0;
+
+                _gridPoints.Clear();
+                foreach (var p in points)
+                {
+                    _gridPoints.Add(new ScanPointUI { X = p.X - cx, Y = p.Y - cy });
+                }
+            }
+        }
+
+        private void DrawGridPreview()
+        {
+            if (GridCanvas == null || !_controlsReady) return;
+            GridCanvas.Children.Clear();
+
+            double targetW = 200;
+            double targetH = 200;
+
+            double minX = _marlin.CurrentX, maxX = _marlin.CurrentX;
+            double minY = _marlin.CurrentY, maxY = _marlin.CurrentY;
+
+            if (_gridPoints.Count > 0)
+            {
+                minX = Math.Min(minX, _gridPoints.Min(p => p.X));
+                maxX = Math.Max(maxX, _gridPoints.Max(p => p.X));
+                minY = Math.Min(minY, _gridPoints.Min(p => p.Y));
+                maxY = Math.Max(maxY, _gridPoints.Max(p => p.Y));
+            }
+
+            double rangeX = maxX - minX;
+            double rangeY = maxY - minY;
+            double padding = Math.Max(rangeX, rangeY) * 0.15;
+            if (padding == 0) padding = 1.0;
+
+            minX -= padding; maxX += padding;
+            minY -= padding; maxY += padding;
+
+            double scaleX = targetW / (maxX - minX);
+            double scaleY = targetH / (maxY - minY);
+            double scale = Math.Min(scaleX, scaleY);
+
+            double offsetX = (targetW - (maxX - minX) * scale) / 2.0 - minX * scale;
+            double offsetY = (targetH - (maxY - minY) * scale) / 2.0 - minY * scale;
+
+            Point ToCanvas(double x, double y) => new Point(x * scale + offsetX, targetH - (y * scale + offsetY));
+
+            // Draw Paths
+            if (_gridPoints.Count > 1)
+            {
+                for (int i = 0; i < _gridPoints.Count - 1; i++)
+                {
+                    Point p1 = ToCanvas(_gridPoints[i].X, _gridPoints[i].Y);
+                    Point p2 = ToCanvas(_gridPoints[i+1].X, _gridPoints[i+1].Y);
+                    
+                    Line line = new Line { X1 = p1.X, Y1 = p1.Y, X2 = p2.X, Y2 = p2.Y, Stroke = Brushes.LightGray, StrokeThickness = 1.5 };
+                    GridCanvas.Children.Add(line);
+                }
+            }
+
+            // Draw Points
+            for(int i = 0; i < _gridPoints.Count; i++)
+            {
+                Point c = ToCanvas(_gridPoints[i].X, _gridPoints[i].Y);
+                Ellipse dot = new Ellipse { Width = 7, Height = 7, Fill = Brushes.SteelBlue };
+                Canvas.SetLeft(dot, c.X - 3.5);
+                Canvas.SetTop(dot, c.Y - 3.5);
+                dot.Tag = _gridPoints[i];
+                GridCanvas.Children.Add(dot);
+            }
+
+            // Draw Stage Pos
+            Point stageP = ToCanvas(_marlin.CurrentX, _marlin.CurrentY);
+            Ellipse stage = new Ellipse { Width = 9, Height = 9, Fill = Brushes.LimeGreen, Stroke = Brushes.DarkGreen, StrokeThickness = 1 };
+            Canvas.SetLeft(stage, stageP.X - 4.5);
+            Canvas.SetTop(stage, stageP.Y - 4.5);
+            GridCanvas.Children.Add(stage);
+        }
+
+        private void GridCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is Ellipse dot && dot.Tag is ScanPointUI p)
+            {
+                GridPointsDataGrid.SelectedItem = p;
+                GridPointsDataGrid.ScrollIntoView(p);
+                
+                if (_marlin.IsConnected)
+                {
+                    _marlin.MoveXY(p.X, p.Y, GetFeedRate());
+                    UpdatePosUI();
+                }
+                else
+                {
+                    MessageBox.Show("Please connect serial port in Setup tab to move the stage.");
+                }
+            }
+        }
+
+        private void GridCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.OriginalSource is Ellipse dot && dot.Tag is ScanPointUI p)
+            {
+                CanvasStatusText.Text = $"Idx: {p.Index} -> X: {p.X:F2}, Y: {p.Y:F2}";
+            }
+            else
+            {
+                CanvasStatusText.Text = "Hover over a point...";
             }
         }
 
         private async void StartScanButton_Click(object sender, RoutedEventArgs e)
         {
             if (!_marlin.IsConnected) { MessageBox.Show("Please connect serial port in Setup tab."); return; }
+            if (_gridPoints.Count == 0) { MessageBox.Show("Please generate or add points to the grid first."); return; }
             if (!ValidateAcquisition()) return;
 
-            if (!int.TryParse(GridXPoints.Text, out int xPoints) || xPoints < 1) return;
-            if (!int.TryParse(GridYPoints.Text, out int yPoints) || yPoints < 1) return;
-            if (!double.TryParse(GridXStep.Text, out double xStep)) return;
-            if (!double.TryParse(GridYStep.Text, out double yStep)) return;
             if (!int.TryParse(GridDwellMs.Text, out int dwell) || dwell < 0) return;
-            
-            // Generate row-by-row traversal
-            List<Point> path = new List<Point>();
-            for (int y = 0; y < yPoints; y++)
-            {
-                for (int x = 0; x < xPoints; x++)
-                {
-                    path.Add(new Point(x * xStep, y * yStep));
-                }
-            }
+
+            // Make a snapshot copy of the points for the background thread
+            List<ScanPointUI> path = _gridPoints.ToList();
 
             int feedRate = GetFeedRate();
 
@@ -333,13 +656,13 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             ScanStatusText.Text = "Cancelling...";
         }
 
-        private void ScanLoop(List<Point> path, int feedRate, int dwellMs, int frames, CancellationToken token)
+        private void ScanLoop(List<ScanPointUI> path, int feedRate, int dwellMs, int frames, CancellationToken token)
         {
             for (int i = 0; i < path.Count; i++)
             {
                 token.ThrowIfCancellationRequested();
 
-                Point p = path[i];
+                ScanPointUI p = path[i];
                 
                 // 1) Move Stage
                 _marlin.MoveXY(p.X, p.Y, feedRate);
@@ -368,7 +691,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 string pngName = $"Scan_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.png";
                 
                 Dispatcher.Invoke(() => {
-                    SaveDataSetToPng(dataSet, Path.Combine(OutputFolderText.Text, pngName));
+                    SaveDataSetToPng(dataSet, System.IO.Path.Combine(OutputFolderText.Text, pngName));
                     ScanProgressBar.Value = i + 1;
                 });
 
@@ -482,7 +805,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
 
             try
             {
-                string jsonPath = Path.Combine(targetDir, $"ScanMetadata_{DateTime.Now:yyyyMMdd_HHmmss}.json");
+                string jsonPath = System.IO.Path.Combine(targetDir, $"ScanMetadata_{DateTime.Now:yyyyMMdd_HHmmss}.json");
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine("[");
                 for (int i = 0; i < _scanRecords.Count; i++)
@@ -517,7 +840,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 IImageData frame = dataset.GetFrame(0, 0);
                 WriteableBitmap bmp = CreateDisplayBitmap(frame);
 
-                string dir = Path.GetDirectoryName(filepath);
+                string dir = System.IO.Path.GetDirectoryName(filepath);
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
                 using (FileStream fs = new FileStream(filepath, FileMode.Create))
