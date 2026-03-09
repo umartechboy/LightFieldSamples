@@ -24,63 +24,7 @@
                             <!-- Image Acquisition Settings -->
                             <GroupBox Header="Image Acquisition Settings" Margin="0,0,0,8">
                                 <StackPanel Margin="4">
-                                    <Label Content="Region of Interest" FontWeight="SemiBold" Margin="0,0,0,2"/>
-                                    <RadioButton Name="FullChip" Content="Full Chip" IsChecked="True" Margin="4,2,0,2" Checked="FullChip_Checked"/>
-                                    <RadioButton Name="FullSensorBinned" Content="Full Sensor, Binned" Margin="4,2,0,2" Checked="FullSensorBinned_Checked"/>
-                                    <Grid Name="BinningPanel" Margin="20,2,0,2" Visibility="Collapsed">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="70"/>
-                                            <ColumnDefinition Width="50"/>
-                                            <ColumnDefinition Width="70"/>
-                                            <ColumnDefinition Width="50"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Column="0" Content="Bin Width:"/>
-                                        <TextBox Grid.Column="1" Name="BinWidth" Text="1" TextChanged="BinWidth_TextChanged"/>
-                                        <Label Grid.Column="2" Content="Bin Height:"/>
-                                        <TextBox Grid.Column="3" Name="BinHeight" Text="1" TextChanged="BinHeight_TextChanged"/>
-                                    </Grid>
-                                    <RadioButton Name="CustomRegion" Content="Custom Region of Interest" Margin="4,2,0,2" Checked="CustomRegion_Checked"/>
-                                    <Grid Name="CustomRoiPanel" Margin="20,2,0,2" Visibility="Collapsed">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="40"/>
-                                            <ColumnDefinition Width="60"/>
-                                            <ColumnDefinition Width="40"/>
-                                            <ColumnDefinition Width="60"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="X:"/>
-                                        <TextBox Grid.Row="0" Grid.Column="1" Name="RoiX" Text="0" TextChanged="RoiX_TextChanged"/>
-                                        <Label Grid.Row="0" Grid.Column="2" Content="Y:"/>
-                                        <TextBox Grid.Row="0" Grid.Column="3" Name="RoiY" Text="0" TextChanged="RoiY_TextChanged"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="W:"/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Name="RoiWidth" Text="100" TextChanged="RoiWidth_TextChanged"/>
-                                        <Label Grid.Row="1" Grid.Column="2" Content="H:"/>
-                                        <TextBox Grid.Row="1" Grid.Column="3" Name="RoiHeight" Text="100" TextChanged="RoiHeight_TextChanged"/>
-                                        <Label Grid.Row="2" Grid.Column="0" Content="XBin:"/>
-                                        <TextBox Grid.Row="2" Grid.Column="1" Name="RoiXBin" Text="1" TextChanged="RoiXBin_TextChanged"/>
-                                        <Label Grid.Row="2" Grid.Column="2" Content="YBin:"/>
-                                        <TextBox Grid.Row="2" Grid.Column="3" Name="RoiYBin" Text="1" TextChanged="RoiYBin_TextChanged"/>
-                                    </Grid>
-                                    <Separator Margin="0,6,0,6"/>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="110"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Label Grid.Row="0" Grid.Column="0" Content="Exposure (ms):" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Row="0" Grid.Column="1" Name="ExposureMs" Text="100" Margin="0,2,0,2"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Content="Frames:" VerticalAlignment="Center"/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Name="FramesBox" Text="1" Margin="0,2,0,2"/>
-                                    </Grid>
-                                    <Separator Margin="0,6,0,6"/>
+                                    <Label Content="Settings Managed by LightField Experiment Panel" Foreground="Gray" Margin="0,0,0,8" FontStyle="Italic"/>
                                     <Button Name="TestAcquireButton" Content="Test Acquire Image" Height="28" Margin="0,0,0,4" Click="TestAcquireButton_Click"/>
                                     <TextBlock Name="AcqStatusText" Text="" Foreground="DarkGreen" Margin="0,6,0,0" TextWrapping="Wrap"/>
                                     

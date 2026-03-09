@@ -31,10 +31,6 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
         private CancellationTokenSource _scanCts;
         private readonly List<ScanPointRecord> _scanRecords = new List<ScanPointRecord>();
 
-        // ── ROI state ─────────────────────────────────────────────────────────
-        private int _binW = 1, _binH = 1;
-        private int _roiX = 0, _roiY = 0, _roiW = 100, _roiH = 100, _roiXBin = 1, _roiYBin = 1;
-
         public class ScanPointRecord
         {
             public double X;
@@ -60,7 +56,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             OutputFolderText.Text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BAP_Lab_Export");
 
             _controlsReady = true;
-            UpdateRoiPreview();
+            InitBlackPreview();
         }
 
         // ═══════════════════════════════════════════════════════════════════════
@@ -182,56 +178,9 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
         private void MoveZMinus_Click(object sender, RoutedEventArgs e) { _marlin.MoveRelativeZ(-GetMoveStep(), GetFeedRate()); UpdatePosUI(); }
         private void MoveZPlus_Click(object sender, RoutedEventArgs e) { _marlin.MoveRelativeZ(GetMoveStep(), GetFeedRate()); UpdatePosUI(); }
 
-        // ── ROI Configuration ─────────────────────────────────────────────────
-        private void FullChip_Checked(object sender, RoutedEventArgs e)
-        {
-            if (!_controlsReady) return;
-            BinningPanel.Visibility = Visibility.Collapsed;
-            CustomRoiPanel.Visibility = Visibility.Collapsed;
-            UpdateRoiPreview();
-            if (CameraExists) _experiment.SetFullSensorRegion();
-        }
-        private void FullSensorBinned_Checked(object sender, RoutedEventArgs e)
-        {
-            if (!_controlsReady) return;
-            BinningPanel.Visibility = Visibility.Visible;
-            CustomRoiPanel.Visibility = Visibility.Collapsed;
-            UpdateRoiPreview();
-            if (CameraExists) _experiment.SetBinnedSensorRegion(_binW, _binH);
-        }
-        private void CustomRegion_Checked(object sender, RoutedEventArgs e)
-        {
-            if (!_controlsReady) return;
-            BinningPanel.Visibility = Visibility.Collapsed;
-            CustomRoiPanel.Visibility = Visibility.Visible;
-            ApplyCustomRoi();
-            UpdateRoiPreview();
-        }
+        // ── Pre-Acquire Setup ─────────────────────────────────────────────────
 
-        private void BinWidth_TextChanged(object sender, TextChangedEventArgs e) { if (ParseInt(BinWidth, ref _binW) && FullSensorBinned.IsChecked == true) _experiment.SetBinnedSensorRegion(_binW, _binH); }
-        private void BinHeight_TextChanged(object sender, TextChangedEventArgs e) { if (ParseInt(BinHeight, ref _binH) && FullSensorBinned.IsChecked == true) _experiment.SetBinnedSensorRegion(_binW, _binH); }
-        
-        private void RoiX_TextChanged(object sender, TextChangedEventArgs e) { ParseInt(RoiX, ref _roiX); ApplyCustomRoi(); UpdateRoiPreview(); }
-        private void RoiY_TextChanged(object sender, TextChangedEventArgs e) { ParseInt(RoiY, ref _roiY); ApplyCustomRoi(); UpdateRoiPreview(); }
-        private void RoiWidth_TextChanged(object sender, TextChangedEventArgs e) { ParseInt(RoiWidth, ref _roiW); ApplyCustomRoi(); UpdateRoiPreview(); }
-        private void RoiHeight_TextChanged(object sender, TextChangedEventArgs e) { ParseInt(RoiHeight, ref _roiH); ApplyCustomRoi(); UpdateRoiPreview(); }
-        private void RoiXBin_TextChanged(object sender, TextChangedEventArgs e) { ParseInt(RoiXBin, ref _roiXBin); ApplyCustomRoi(); UpdateRoiPreview(); }
-        private void RoiYBin_TextChanged(object sender, TextChangedEventArgs e) { ParseInt(RoiYBin, ref _roiYBin); ApplyCustomRoi(); UpdateRoiPreview(); }
-
-        private bool ParseInt(TextBox tb, ref int val)
-        {
-            if (!_controlsReady) return false;
-            if (int.TryParse(tb.Text, out int v) && v >= 0) { val = v; return true; }
-            return false;
-        }
-
-        private void ApplyCustomRoi()
-        {
-            if (!CameraExists || CustomRegion.IsChecked != true) return;
-            _experiment.SetCustomRegions(new[] { new RegionOfInterest(_roiX, _roiY, _roiW, _roiH, _roiXBin, _roiYBin) });
-        }
-
-        private void UpdateRoiPreview()
+        private void InitBlackPreview()
         {
             if (!_controlsReady) return;
 
@@ -241,30 +190,6 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             int stride = bmp.BackBufferStride / 4;
             int[] pixels = new int[stride * h];
 
-            if (CustomRegion.IsChecked == true)
-            {
-                int endX = Math.Min(_roiX + _roiW, w);
-                int endY = Math.Min(_roiY + _roiH, h);
-                int startX = Math.Max(_roiX, 0);
-                int startY = Math.Max(_roiY, 0);
-
-                for (int y = startY; y < endY; y++)
-                {
-                    for (int x = startX; x < endX; x++)
-                    {
-                        bool isBorder = false;
-                        if (x == startX || x == endX - 1 || y == startY || y == endY - 1)
-                        {
-                            isBorder = true;
-                        }
-                        if (isBorder)
-                        {
-                            pixels[y * stride + x] = (255 << 16); // Red
-                        }
-                    }
-                }
-            }
-
             bmp.Lock();
             Marshal.Copy(pixels, 0, bmp.BackBuffer, stride * h);
             bmp.AddDirtyRect(new Int32Rect(0, 0, w, h));
@@ -272,26 +197,17 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             SetupImageControl.Source = bmp;
         }
 
-        private void ApplyCurrentRoi()
-        {
-            if (!CameraExists) return;
-            if (FullChip.IsChecked == true) _experiment.SetFullSensorRegion();
-            else if (FullSensorBinned.IsChecked == true) _experiment.SetBinnedSensorRegion(_binW, _binH);
-            else ApplyCustomRoi();
-        }
-
         private void TestAcquireButton_Click(object sender, RoutedEventArgs e)
         {
             // Just acquires and shows in LightField UI. Does not append to scan records.
             if (!ValidateAcquisition()) return;
-            if (!double.TryParse(ExposureMs.Text, out double expMs) || !int.TryParse(FramesBox.Text, out int frames)) return;
 
             try
             {
                 TestAcquireButton.IsEnabled = false;
-                ApplyCurrentRoi();
-                _experiment.SetValue(CameraSettings.ShutterTimingExposureTime, expMs);
-                _experiment.SetValue(ExperimentSettings.AcquisitionFramesToStore, frames);
+
+                // Read exactly how many frames LightField is currently configured to take
+                int frames = Convert.ToInt32(_experiment.GetValue(ExperimentSettings.AcquisitionFramesToStore) ?? 1);
                 
                 IImageDataSet dataSet = _experiment.Capture(frames);
                 _lastDataSet?.Dispose();
@@ -361,8 +277,6 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             if (!double.TryParse(GridYStep.Text, out double yStep)) return;
             if (!int.TryParse(GridDwellMs.Text, out int dwell) || dwell < 0) return;
             
-            if (!double.TryParse(ExposureMs.Text, out double expMs) || !int.TryParse(FramesBox.Text, out int frames)) return;
-
             // Generate row-by-row traversal
             List<Point> path = new List<Point>();
             for (int y = 0; y < yPoints; y++)
@@ -386,10 +300,8 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             _scanCts = new CancellationTokenSource();
             var token = _scanCts.Token;
 
-            // Apply ROI and set camera exposure limits once
-            ApplyCurrentRoi();
-            _experiment.SetValue(CameraSettings.ShutterTimingExposureTime, expMs);
-            _experiment.SetValue(ExperimentSettings.AcquisitionFramesToStore, frames);
+            // Read exactly how many frames LightField is currently configured to take per point
+            int frames = Convert.ToInt32(_experiment.GetValue(ExperimentSettings.AcquisitionFramesToStore) ?? 1);
 
             // Run Background Task
             try
