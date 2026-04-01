@@ -21,8 +21,8 @@
 
                         <!-- LEFT COLUMN -->
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                            <!-- Image Acquisition Settings -->
-                            <GroupBox Header="Image Acquisition Settings" Margin="0,0,0,8">
+                            <!-- Image Acquisition -->
+                            <GroupBox Header="Image Acquisition" Margin="0,0,0,8">
                                 <StackPanel Margin="4">
                                     <Label Content="Settings Managed by LightField Experiment Panel" Foreground="Gray" Margin="0,0,0,8" FontStyle="Italic"/>
                                     <Button Name="TestAcquireButton" Content="Test Acquire Image" Height="28" Margin="0,0,0,4" Click="TestAcquireButton_Click"/>

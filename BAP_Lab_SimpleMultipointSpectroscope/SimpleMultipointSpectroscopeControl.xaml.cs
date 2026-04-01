@@ -689,9 +689,11 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 // 4) Save memory immediately
                 string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
                 string pngName = $"Scan_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.png";
+                string csvName = $"Scan_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.csv";
                 
                 Dispatcher.Invoke(() => {
                     SaveDataSetToPng(dataSet, System.IO.Path.Combine(OutputFolderText.Text, pngName));
+                    SaveDataSetToCsv(dataSet, System.IO.Path.Combine(OutputFolderText.Text, csvName));
                     ScanProgressBar.Value = i + 1;
                 });
 
@@ -706,9 +708,64 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 });
             }
 
+            // 6) Auto-Export Metadata
             Dispatcher.Invoke(() => {
+                AutoSaveMetadata();
                 ScanStatusText.Text = "Scan Complete.";
             });
+        }
+
+        private void AutoSaveMetadata()
+        {
+            try
+            {
+                string targetDir = OutputFolderText.Text;
+                if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
+
+                string jsonPath = System.IO.Path.Combine(targetDir, $"ScanMetadata_{DateTime.Now:yyyyMMdd_HHmmss}.json");
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("{");
+                
+                // Camera Settings
+                sb.AppendLine("  \"CameraSettings\": {");
+                sb.AppendLine($"    \"ExposureTime\": \"{_experiment.GetValue(CameraSettings.ShutterTimingExposureTime)}\",");
+                sb.AppendLine($"    \"Frames\": \"{_experiment.GetValue(ExperimentSettings.AcquisitionFramesToStore)}\",");
+                sb.AppendLine($"    \"Grating\": \"{_experiment.GetValue(SpectrometerSettings.GratingSelected)}\"");
+                sb.AppendLine("  },");
+
+                // Scan Config
+                sb.AppendLine("  \"ScanConfig\": {");
+                sb.AppendLine($"    \"XPoints\": \"{GridXPoints.Text}\",");
+                sb.AppendLine($"    \"YPoints\": \"{GridYPoints.Text}\",");
+                sb.AppendLine($"    \"XStep\": \"{GridXStep.Text}\",");
+                sb.AppendLine($"    \"YStep\": \"{GridYStep.Text}\",");
+                sb.AppendLine($"    \"DwellMs\": \"{GridDwellMs.Text}\",");
+                sb.AppendLine($"    \"Pattern\": \"{(GridPatternCombo.SelectedItem as ComboBoxItem)?.Content}\",");
+                sb.AppendLine($"    \"Staggered\": \"{StaggeredCheck.IsChecked == true}\"");
+                sb.AppendLine("  },");
+
+                // Points History
+                sb.AppendLine("  \"ScanRecords\": [");
+                for (int i = 0; i < _scanRecords.Count; i++)
+                {
+                    var r = _scanRecords[i];
+                    sb.AppendLine("    {");
+                    sb.AppendLine($"      \"X\": {r.X},");
+                    sb.AppendLine($"      \"Y\": {r.Y},");
+                    sb.AppendLine($"      \"Z\": {r.Z},");
+                    sb.AppendLine($"      \"Timestamp\": \"{r.Timestamp}\",");
+                    sb.AppendLine($"      \"PNG\": \"{r.Filename}\",");
+                    sb.AppendLine($"      \"CSV\": \"{r.Filename.Replace(".png", ".csv")}\"");
+                    sb.Append("    }");
+                    if (i < _scanRecords.Count - 1) sb.Append(",");
+                    sb.AppendLine();
+                }
+                sb.AppendLine("  ]");
+                sb.AppendLine("}");
+
+                File.WriteAllText(jsonPath, sb.ToString());
+            }
+            catch { /* Ignore auto-export failure */ }
         }
 
         private void UpdateLiveImageFrame(IImageDataSet dataset)
@@ -855,6 +912,37 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 Dispatcher.Invoke(() => {
                     TerminalText.AppendText($"Error saving {filepath}: {ex.Message}\n");
                 });
+            }
+        }
+
+        private void SaveDataSetToCsv(IImageDataSet dataset, string filepath)
+        {
+            try
+            {
+                IImageData frame = dataset.GetFrame(0, 0);
+                Array rawData = frame.GetData();
+                int width = frame.Width;
+                int height = frame.Height;
+
+                string dir = System.IO.Path.GetDirectoryName(filepath);
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
+                using (StreamWriter sw = new StreamWriter(filepath))
+                {
+                    for (int r = 0; r < height; r++)
+                    {
+                        var row = new List<string>();
+                        for (int c = 0; c < width; c++)
+                        {
+                            row.Add(rawData.GetValue(r * width + c).ToString());
+                        }
+                        sw.WriteLine(string.Join(",", row));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Ignore silent failure
             }
         }
     }
