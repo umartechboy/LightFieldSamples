@@ -183,25 +183,27 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
 
         // ── Manual Movement ───────────────────────────────────────────────────
 
-        private double GetMoveStep()
-        {
-            if (MoveStepCoarse.IsChecked == true) return 1.0;
-            if (MoveStepFine.IsChecked == true) return 0.1;
-            return 0.01;
-        }
-
         private int GetFeedRate()
         {
             if (int.TryParse(MoveFeedRate.Text, out int f) && f > 0) return f;
             return 3000;
         }
 
-        private void MoveXMinus_Click(object sender, RoutedEventArgs e) { _marlin.MoveRelativeX(-GetMoveStep(), GetFeedRate()); UpdatePosUI(); }
-        private void MoveXPlus_Click(object sender, RoutedEventArgs e) { _marlin.MoveRelativeX(GetMoveStep(), GetFeedRate()); UpdatePosUI(); }
-        private void MoveYMinus_Click(object sender, RoutedEventArgs e) { _marlin.MoveRelativeY(-GetMoveStep(), GetFeedRate()); UpdatePosUI(); }
-        private void MoveYPlus_Click(object sender, RoutedEventArgs e) { _marlin.MoveRelativeY(GetMoveStep(), GetFeedRate()); UpdatePosUI(); }
-        private void MoveZMinus_Click(object sender, RoutedEventArgs e) { _marlin.MoveRelativeZ(-GetMoveStep(), GetFeedRate()); UpdatePosUI(); }
-        private void MoveZPlus_Click(object sender, RoutedEventArgs e) { _marlin.MoveRelativeZ(GetMoveStep(), GetFeedRate()); UpdatePosUI(); }
+        private void MoveBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is Button btn) || btn.Tag == null) return;
+            string tag = btn.Tag.ToString();
+            if (tag.Length < 2) return;
+            
+            char axis = char.ToUpper(tag[0]);
+            if (!double.TryParse(tag.Substring(1), out double dist)) return;
+            int fr = GetFeedRate();
+            
+            if (axis == 'X') _marlin.MoveRelativeX(dist, fr);
+            else if (axis == 'Y') _marlin.MoveRelativeY(dist, fr);
+            else if (axis == 'Z') _marlin.MoveRelativeZ(dist, fr);
+            UpdatePosUI();
+        }
 
         // ── Pre-Acquire Setup ─────────────────────────────────────────────────
 

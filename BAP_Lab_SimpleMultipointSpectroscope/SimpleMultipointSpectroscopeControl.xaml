@@ -37,48 +37,61 @@
                             <!-- Manual Movement -->
                             <GroupBox Header="Manual Move" Margin="0,0,0,8">
                                 <StackPanel Margin="4">
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <Label Content="Step Size:" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                        <RadioButton Name="MoveStepCoarse" Content="1 mm" IsChecked="True" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <RadioButton Name="MoveStepFine" Content="0.1 mm" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <RadioButton Name="MoveStepSuperFine" Content="0.01 mm" VerticalAlignment="Center"/>
-                                    </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
                                         <Label Content="Feed Rate:" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                         <TextBox Name="MoveFeedRate" Text="3000" Width="60" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                     </StackPanel>
+
                                     <Grid HorizontalAlignment="Left" Margin="0,10,0,0">
                                         <Grid.RowDefinitions>
+                                            <RowDefinition Height="35"/>
+                                            <RowDefinition Height="35"/>
+                                            <RowDefinition Height="35"/>
                                             <RowDefinition Height="45"/>
-                                            <RowDefinition Height="45"/>
-                                            <RowDefinition Height="45"/>
+                                            <RowDefinition Height="35"/>
+                                            <RowDefinition Height="35"/>
+                                            <RowDefinition Height="35"/>
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="45"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
                                             <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition Width="45"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
                                             <ColumnDefinition Width="20"/> <!-- Spacer -->
-                                            <ColumnDefinition Width="45"/>
+                                            <ColumnDefinition Width="40"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- Y+ (Top) -->
-                                        <Button Grid.Row="0" Grid.Column="1" Content="Y+" Width="40" Height="40" Click="MoveYPlus_Click"/>
+                                        <!-- Y Axis Positive -->
+                                        <Button Grid.Row="0" Grid.Column="3" Content="Y+++" ToolTip="1.0 mm" Click="MoveBtn_Click" Tag="Y1.0" Width="38" Height="30" />
+                                        <Button Grid.Row="1" Grid.Column="3" Content="Y++" ToolTip="0.1 mm" Click="MoveBtn_Click" Tag="Y0.1" Width="38" Height="30" />
+                                        <Button Grid.Row="2" Grid.Column="3" Content="Y+" ToolTip="0.01 mm" Click="MoveBtn_Click" Tag="Y0.01" Width="38" Height="30" />
 
-                                        <!-- X- (Left) -->
-                                        <Button Grid.Row="1" Grid.Column="0" Content="X-" Width="40" Height="40" Click="MoveXMinus_Click"/>
+                                        <!-- Horizontal Axis -->
+                                        <Button Grid.Row="3" Grid.Column="0" Content="X---" ToolTip="-1.0 mm" Click="MoveBtn_Click" Tag="X-1.0" Width="38" Height="38" />
+                                        <Button Grid.Row="3" Grid.Column="1" Content="X--" ToolTip="-0.1 mm" Click="MoveBtn_Click" Tag="X-0.1" Width="38" Height="38" />
+                                        <Button Grid.Row="3" Grid.Column="2" Content="X-" ToolTip="-0.01 mm" Click="MoveBtn_Click" Tag="X-0.01" Width="38" Height="38" />
+                                        
+                                        <Button Grid.Row="3" Grid.Column="3" Content="Set Origin" Width="90" Height="40" Click="SetOrigin_Click"/>
+                                        
+                                        <Button Grid.Row="3" Grid.Column="4" Content="X+" ToolTip="0.01 mm" Click="MoveBtn_Click" Tag="X0.01" Width="38" Height="38" />
+                                        <Button Grid.Row="3" Grid.Column="5" Content="X++" ToolTip="0.1 mm" Click="MoveBtn_Click" Tag="X0.1" Width="38" Height="38" />
+                                        <Button Grid.Row="3" Grid.Column="6" Content="X+++" ToolTip="1.0 mm" Click="MoveBtn_Click" Tag="X1.0" Width="38" Height="38" />
 
-                                        <!-- Set Origin (Middle) -->
-                                        <Button Grid.Row="1" Grid.Column="1" Content="Set Origin" Width="90" Height="40" Click="SetOrigin_Click" Background="LightBlue"/>
+                                        <!-- Y Axis Negative -->
+                                        <Button Grid.Row="4" Grid.Column="3" Content="Y-" ToolTip="-0.01 mm" Click="MoveBtn_Click" Tag="Y-0.01" Width="38" Height="30" />
+                                        <Button Grid.Row="5" Grid.Column="3" Content="Y--" ToolTip="-0.1 mm" Click="MoveBtn_Click" Tag="Y-0.1" Width="38" Height="30" />
+                                        <Button Grid.Row="6" Grid.Column="3" Content="Y---" ToolTip="-1.0 mm" Click="MoveBtn_Click" Tag="Y-1.0" Width="38" Height="30" />
 
-                                        <!-- X+ (Right) -->
-                                        <Button Grid.Row="1" Grid.Column="2" Content="X+" Width="40" Height="40" Click="MoveXPlus_Click"/>
-
-                                        <!-- Y- (Bottom) -->
-                                        <Button Grid.Row="2" Grid.Column="1" Content="Y-" Width="40" Height="40" Click="MoveYMinus_Click"/>
-
-                                        <!-- Z Stack (Far Right) -->
-                                        <Button Grid.Row="0" Grid.Column="4" Content="Z+" Width="40" Height="40" Click="MoveZPlus_Click"/>
-                                        <Button Grid.Row="2" Grid.Column="4" Content="Z-" Width="40" Height="40" Click="MoveZMinus_Click"/>
+                                        <!-- Z Axis -->
+                                        <Button Grid.Row="0" Grid.Column="8" Content="Z+++" ToolTip="1.0 mm" Click="MoveBtn_Click" Tag="Z1.0" Width="38" Height="30" />
+                                        <Button Grid.Row="1" Grid.Column="8" Content="Z++" ToolTip="0.1 mm" Click="MoveBtn_Click" Tag="Z0.1" Width="38" Height="30" />
+                                        <Button Grid.Row="2" Grid.Column="8" Content="Z+" ToolTip="0.01 mm" Click="MoveBtn_Click" Tag="Z0.01" Width="38" Height="30" />
+                                        <Button Grid.Row="4" Grid.Column="8" Content="Z-" ToolTip="-0.01 mm" Click="MoveBtn_Click" Tag="Z-0.01" Width="38" Height="30" />
+                                        <Button Grid.Row="5" Grid.Column="8" Content="Z--" ToolTip="-0.1 mm" Click="MoveBtn_Click" Tag="Z-0.1" Width="38" Height="30" />
+                                        <Button Grid.Row="6" Grid.Column="8" Content="Z---" ToolTip="-1.0 mm" Click="MoveBtn_Click" Tag="Z-1.0" Width="38" Height="30" />
                                     </Grid>
                                 </StackPanel>
                             </GroupBox>
