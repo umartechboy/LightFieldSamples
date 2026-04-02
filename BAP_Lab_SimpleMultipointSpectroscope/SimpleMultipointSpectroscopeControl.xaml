@@ -28,9 +28,11 @@
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <Label Content="Settings Managed by LightField Experiment Panel" Foreground="Gray" FontStyle="Italic" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="1" Name="TestAcquireButton" Content="Test Acquire Image" Height="28" Width="150" Click="TestAcquireButton_Click" VerticalAlignment="Center"/>
+                                        <CheckBox Grid.Column="1" Name="LiveVideoCheckBox" Content="Live Video" VerticalAlignment="Center" Margin="10,0,10,0" Checked="LiveVideo_Checked" Unchecked="LiveVideo_Unchecked"/>
+                                        <Button Grid.Column="2" Name="TestAcquireButton" Content="Test Acquire Image" Height="28" Width="150" Click="TestAcquireButton_Click" VerticalAlignment="Center"/>
                                     </Grid>
 
                                     <Border BorderBrush="Gray" BorderThickness="1" Background="Black" Height="150" Margin="0,8,0,0">
@@ -134,7 +136,7 @@
                                                 <Label Content="⌨ Keyboard" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center"/>
                                                 <TextBlock Name="HotRegionStatus" Text="Hover to activate" 
                                                            FontSize="9" TextAlignment="Center" Foreground="Gray" Margin="5" TextWrapping="Wrap"/>
-                                                <TextBlock Text="Arrows (XY)&#x0a;PgUp/Dn (Z)&#x0a;[Ctrl] for Fine" 
+                                                <TextBlock Text="Arrows(XY), PgUp/Dn(Z)&#x0a;[Ctrl] Mod, [Space] Capture" 
                                                            FontSize="8" TextAlignment="Center" Foreground="#888" Margin="0,5,0,0" />
                                             </StackPanel>
                                         </Border>
@@ -340,8 +342,8 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Button Grid.Column="0" Name="StartScanButton" Content="Start Scan" Height="30" Margin="0,0,4,0" Click="StartScanButton_Click" Background="LightGreen"/>
-                                        <Button Grid.Column="1" Name="StopScanButton" Content="Stop Scan" Height="30" Margin="4,0,0,0" IsEnabled="False" Click="StopScanButton_Click" Background="LightCoral"/>
+                                        <Button Grid.Column="0" Name="StartScanButton" Content="Start Scan" Height="30" Margin="0,0,4,0" Click="StartScanButton_Click" Background="LightGreen" Foreground="Black"/>
+                                        <Button Grid.Column="1" Name="StopScanButton" Content="Stop Scan" Height="30" Margin="4,0,0,0" IsEnabled="False" Click="StopScanButton_Click" Background="LightCoral" Foreground="Black"/>
                                     </Grid>
                                     <ProgressBar Name="ScanProgressBar" Height="20" Minimum="0" Maximum="100" Value="0"/>
                                     <TextBlock Name="ScanStatusText" Text="Ready" Margin="0,4,0,0" FontWeight="SemiBold"/>

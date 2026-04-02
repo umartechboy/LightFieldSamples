@@ -45,6 +45,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
         private MarlinDriver _marlin;
         private IImageDataSet _lastDataSet;
         private bool _controlsReady = false;
+        private bool _isLiveVideo = false;
 
         // ── Keyboard Movement ──────────────────────────────────────────────────
         private readonly System.Windows.Threading.DispatcherTimer _keyMoveTimer = new System.Windows.Threading.DispatcherTimer();
@@ -269,6 +270,14 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             base.OnPreviewKeyDown(e);
             if (_isHotRegionActive)
             {
+                // Capture image on Space bar
+                if (e.Key == Key.Space)
+                {
+                    DoCaptureOnce();
+                    e.Handled = true;
+                    return;
+                }
+
                 if (!_pressedKeys.Contains(e.Key))
                 {
                     _pressedKeys.Add(e.Key);
@@ -342,11 +351,64 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             SetupImageControl.Source = bmp;
         }
 
+        private async void LiveVideo_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLiveVideo) return;
+            _isLiveVideo = true;
+            TestAcquireButton.IsEnabled = false;
+
+            try
+            {
+                while (_isLiveVideo)
+                {
+                    // Check conditions without showing message boxes repeatedly
+                    if (!CameraExists || !_experiment.IsReadyToRun)
+                    {
+                        LiveVideoCheckBox.IsChecked = false;
+                        _isLiveVideo = false;
+                        break;
+                    }
+
+                    int frames = Convert.ToInt32(_experiment.GetValue(ExperimentSettings.AcquisitionFramesToStore) ?? 1);
+
+                    IImageDataSet dataSet = await Task.Run(() =>
+                    {
+                        try { return _experiment.Capture(frames); }
+                        catch { return null; }
+                    });
+
+                    if (dataSet != null)
+                    {
+                        _lastDataSet?.Dispose();
+                        _lastDataSet = dataSet;
+                        UpdateLiveImageFrame(dataSet);
+                        SetupImageControl.Source = CreateDisplayBitmap(dataSet.GetFrame(0, 0));
+                    }
+                    
+                    await Task.Delay(10);
+                }
+            }
+            finally
+            {
+                _isLiveVideo = false;
+                TestAcquireButton.IsEnabled = true;
+            }
+        }
+
+        private void LiveVideo_Unchecked(object sender, RoutedEventArgs e)
+        {
+            _isLiveVideo = false;
+        }
+
         private void TestAcquireButton_Click(object sender, RoutedEventArgs e)
         {
             // Just acquires and shows in LightField UI. Does not append to scan records.
             if (!ValidateAcquisition()) return;
+            DoCaptureOnce();
+        }
 
+        private void DoCaptureOnce()
+        {
             try
             {
                 TestAcquireButton.IsEnabled = false;
@@ -375,7 +437,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             }
             finally
             {
-                TestAcquireButton.IsEnabled = true;
+                if (!_isLiveVideo) TestAcquireButton.IsEnabled = true;
             }
         }
 
