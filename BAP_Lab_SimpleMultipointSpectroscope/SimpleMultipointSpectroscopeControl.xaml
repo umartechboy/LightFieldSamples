@@ -13,9 +13,9 @@
             <!-- ======================================================= -->
             <TabItem Header="Setup">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                    <Grid Margin="8" HorizontalAlignment="Left" MinWidth="700">
+                    <Grid Margin="8" HorizontalAlignment="Left" MinWidth="1080">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="360"/>
+                            <ColumnDefinition Width="720"/>
                             <ColumnDefinition Width="360"/>
                         </Grid.ColumnDefinitions>
 
@@ -31,6 +31,30 @@
                                     <Border BorderBrush="Gray" BorderThickness="1" Background="Black" Height="150" Margin="0,8,0,0">
                                         <Image Name="SetupImageControl" Stretch="Uniform"/>
                                     </Border>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <!-- Manual Movement -->
+                            <GroupBox Header="Manual Move" Margin="0,0,0,8">
+                                <StackPanel Margin="4">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <Label Content="Step Size:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <RadioButton Name="MoveStepCoarse" Content="1 mm" IsChecked="True" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <RadioButton Name="MoveStepFine" Content="0.1 mm" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <RadioButton Name="MoveStepSuperFine" Content="0.01 mm" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+                                        <Label Content="Feed Rate:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBox Name="MoveFeedRate" Text="3000" Width="60" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    </StackPanel>
+                                    <WrapPanel Margin="0,4,0,0">
+                                        <Button Content="X-" Width="40" Margin="0,0,4,4" Click="MoveXMinus_Click"/>
+                                        <Button Content="X+" Width="40" Margin="0,0,12,4" Click="MoveXPlus_Click"/>
+                                        <Button Content="Y-" Width="40" Margin="0,0,4,4" Click="MoveYMinus_Click"/>
+                                        <Button Content="Y+" Width="40" Margin="0,0,12,4" Click="MoveYPlus_Click"/>
+                                        <Button Content="Z-" Width="40" Margin="0,0,4,4" Click="MoveZMinus_Click"/>
+                                        <Button Content="Z+" Width="40" Margin="0,0,4,4" Click="MoveZPlus_Click"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
@@ -62,8 +86,8 @@
                                         <ComboBoxItem Content="19200"/>
                                         <ComboBoxItem Content="38400"/>
                                         <ComboBoxItem Content="57600"/>
-                                        <ComboBoxItem IsSelected="True" Content="115200"/>
-                                        <ComboBoxItem Content="250000"/>
+                                        <ComboBoxItem Content="115200"/>
+                                        <ComboBoxItem IsSelected="True" Content="250000"/>
                                     </ComboBox>
                                     
                                     <Button Grid.Row="1" Grid.Column="2" Name="ConnectButton" Content="Connect" Margin="0,2,0,2" Click="ConnectButton_Click"/>
@@ -106,29 +130,6 @@
                                 </StackPanel>
                             </GroupBox>
 
-                            <!-- Manual Movement -->
-                            <GroupBox Header="Manual Move" Margin="0,0,0,8">
-                                <StackPanel Margin="4">
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <Label Content="Step Size:" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                        <RadioButton Name="MoveStepCoarse" Content="1 mm" IsChecked="True" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <RadioButton Name="MoveStepFine" Content="0.1 mm" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <RadioButton Name="MoveStepSuperFine" Content="0.01 mm" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
-                                        <Label Content="Feed Rate:" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                        <TextBox Name="MoveFeedRate" Text="3000" Width="60" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    </StackPanel>
-                                    <WrapPanel Margin="0,4,0,0">
-                                        <Button Content="X-" Width="40" Margin="0,0,4,4" Click="MoveXMinus_Click"/>
-                                        <Button Content="X+" Width="40" Margin="0,0,12,4" Click="MoveXPlus_Click"/>
-                                        <Button Content="Y-" Width="40" Margin="0,0,4,4" Click="MoveYMinus_Click"/>
-                                        <Button Content="Y+" Width="40" Margin="0,0,12,4" Click="MoveYPlus_Click"/>
-                                        <Button Content="Z-" Width="40" Margin="0,0,4,4" Click="MoveZMinus_Click"/>
-                                        <Button Content="Z+" Width="40" Margin="0,0,4,4" Click="MoveZPlus_Click"/>
-                                    </WrapPanel>
-                                </StackPanel>
-                            </GroupBox>
                         </StackPanel>
                     </Grid>
                 </ScrollViewer>
