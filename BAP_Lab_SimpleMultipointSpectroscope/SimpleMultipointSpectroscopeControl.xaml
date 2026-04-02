@@ -70,7 +70,8 @@
                                             <ColumnDefinition Width="40"/>
                                             <!-- Z buttons -->
                                             <ColumnDefinition Width="40"/>
-                                            <!-- Z labels -->
+                                            <ColumnDefinition Width="130"/>
+                                            <!-- Hot Region -->
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Y Axis Positive -->
@@ -121,6 +122,22 @@
                                         <TextBlock Grid.Row="4" Grid.Column="9" Text="{Binding ElementName=ZStepSize1, Path=Text}" Foreground="Gray" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Row="5" Grid.Column="9" Text="{Binding ElementName=ZStepSize2, Path=Text}" Foreground="Gray" FontSize="9" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,10"/>
                                         <TextBlock Grid.Row="6" Grid.Column="9" Text="{Binding ElementName=ZStepSize3, Path=Text}" Foreground="Gray" FontSize="9" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,10"/>
+
+                                        <!-- Keyboard Hot Region -->
+                                        <Border Grid.Column="10" Grid.Row="0" Grid.RowSpan="7" 
+                                                Name="KeyboardHotRegion" 
+                                                BorderBrush="DarkGray" BorderThickness="1"
+                                                Margin="10,0,0,0" CornerRadius="4"
+                                                MouseEnter="HotRegion_MouseEnter" MouseLeave="HotRegion_MouseLeave"
+                                                Background="Transparent">
+                                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <Label Content="⌨ Keyboard" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                                <TextBlock Name="HotRegionStatus" Text="Hover to activate" 
+                                                           FontSize="9" TextAlignment="Center" Foreground="Gray" Margin="5" TextWrapping="Wrap"/>
+                                                <TextBlock Text="Arrows (XY)&#x0a;PgUp/Dn (Z)&#x0a;[Ctrl] for Fine" 
+                                                           FontSize="8" TextAlignment="Center" Foreground="#888" Margin="0,5,0,0" />
+                                            </StackPanel>
+                                        </Border>
                                     </Grid>
                                 </StackPanel>
                             </GroupBox>

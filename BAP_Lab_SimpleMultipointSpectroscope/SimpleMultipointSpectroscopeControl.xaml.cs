@@ -46,6 +46,11 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
         private IImageDataSet _lastDataSet;
         private bool _controlsReady = false;
 
+        // ── Keyboard Movement ──────────────────────────────────────────────────
+        private readonly System.Windows.Threading.DispatcherTimer _keyMoveTimer = new System.Windows.Threading.DispatcherTimer();
+        private readonly HashSet<Key> _pressedKeys = new HashSet<Key>();
+        private bool _isHotRegionActive = false;
+
         // ── Grid Object State ──────────────────────────────────────────────────
         private ObservableCollection<ScanPointUI> _gridPoints;
         private CancellationTokenSource _scanCts;
@@ -81,6 +86,11 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
 
             _controlsReady = true;
             InitBlackPreview();
+
+            // Keyboard Motion Timer
+            _keyMoveTimer.Interval = TimeSpan.FromMilliseconds(150);
+            _keyMoveTimer.Tick += KeyMoveTimer_Tick;
+            _keyMoveTimer.Start();
         }
 
         // ═══════════════════════════════════════════════════════════════════════
@@ -224,6 +234,95 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             UpdatePosUI();
         }
 
+        // ── Keyboard & HotRegion Logic ─────────────────────────────────────────
+
+        private void HotRegion_MouseEnter(object sender, MouseEventArgs e)
+        {
+            _isHotRegionActive = true;
+            this.Focus(); // Ensure the control receives keyboard events
+            if (KeyboardHotRegion != null)
+                KeyboardHotRegion.Background = new SolidColorBrush(Color.FromArgb(40, 0, 255, 0)); // Subtle Green
+            if (HotRegionStatus != null)
+            {
+                HotRegionStatus.Text = "CONTROL ACTIVE";
+                HotRegionStatus.Foreground = Brushes.LimeGreen;
+                HotRegionStatus.FontWeight = FontWeights.Bold;
+            }
+        }
+
+        private void HotRegion_MouseLeave(object sender, MouseEventArgs e)
+        {
+            _isHotRegionActive = false;
+            if (KeyboardHotRegion != null)
+                KeyboardHotRegion.Background = Brushes.Transparent;
+            if (HotRegionStatus != null)
+            {
+                HotRegionStatus.Text = "Hover to activate";
+                HotRegionStatus.Foreground = Brushes.Gray;
+                HotRegionStatus.FontWeight = FontWeights.Normal;
+            }
+            _pressedKeys.Clear();
+        }
+
+        protected override void OnPreviewKeyDown(KeyEventArgs e)
+        {
+            base.OnPreviewKeyDown(e);
+            if (_isHotRegionActive)
+            {
+                if (!_pressedKeys.Contains(e.Key))
+                {
+                    _pressedKeys.Add(e.Key);
+                    // Prevent key-repeat from firing multiple KeyDown events
+                    e.Handled = true;
+                }
+            }
+        }
+
+        protected override void OnPreviewKeyUp(KeyEventArgs e)
+        {
+            base.OnPreviewKeyUp(e);
+            _pressedKeys.Remove(e.Key);
+        }
+
+        private void KeyMoveTimer_Tick(object sender, EventArgs e)
+        {
+            if (!_isHotRegionActive || !_marlin.IsConnected || _pressedKeys.Count == 0) return;
+
+            bool isCtrlDown = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+            double stepXY = 0;
+            double stepZ = 0;
+            
+            // XY Logic: No Ctrl = Rank 3 (+++), Ctrl = Rank 2 (++)
+            if (isCtrlDown) double.TryParse(StepSize2.Text, out stepXY);
+            else            double.TryParse(StepSize3.Text, out stepXY);
+
+            // Z Logic:  No Ctrl = Rank 2 (++),  Ctrl = Rank 1 (+)
+            if (isCtrlDown) double.TryParse(ZStepSize1.Text, out stepZ);
+            else            double.TryParse(ZStepSize2.Text, out stepZ);
+
+            // Update Label String
+            if (HotRegionStatus != null)
+            {
+                string mode = isCtrlDown ? "FINE" : "COARSE";
+                HotRegionStatus.Text = $"{mode}: XY={stepXY} Z={stepZ}";
+            }
+
+            int fr = GetFeedRate();
+            bool moved = false;
+
+            // X/Y: Arrow Keys
+            if (_pressedKeys.Contains(Key.Up))    { _marlin.MoveRelativeY(stepXY, fr); moved = true; }
+            if (_pressedKeys.Contains(Key.Down))  { _marlin.MoveRelativeY(-stepXY, fr); moved = true; }
+            if (_pressedKeys.Contains(Key.Left))  { _marlin.MoveRelativeX(-stepXY, fr); moved = true; }
+            if (_pressedKeys.Contains(Key.Right)) { _marlin.MoveRelativeX(stepXY, fr); moved = true; }
+
+            // Z: PageUp (Z-) / PageDown (Z+) as requested
+            if (_pressedKeys.Contains(Key.PageUp)   || _pressedKeys.Contains(Key.Prior)) { _marlin.MoveRelativeZ(-stepZ, fr); moved = true; }
+            if (_pressedKeys.Contains(Key.PageDown) || _pressedKeys.Contains(Key.Next))  { _marlin.MoveRelativeZ(stepZ, fr); moved = true; }
+
+            if (moved) UpdatePosUI();
+        }
+
         // ── Pre-Acquire Setup ─────────────────────────────────────────────────
 
         private void InitBlackPreview()
@@ -269,11 +368,10 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 IDisplayViewer viewer = _app.DisplayManager?.GetDisplay(DisplayLocation.ExperimentWorkspace, 0);
                 viewer?.Display("BAP Test Acquire", dataSet);
 
-                AcqStatusText.Text = $"✓ Test acquired {frames} frame(s)";
             }
             catch (Exception ex)
             {
-                AcqStatusText.Text = "✗ Acquire failed: " + ex.Message;
+                MessageBox.Show("Acquire failed: " + ex.Message);
             }
             finally
             {
