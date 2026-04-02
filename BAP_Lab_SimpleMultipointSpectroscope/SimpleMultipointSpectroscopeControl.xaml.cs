@@ -89,7 +89,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             InitBlackPreview();
 
             // Keyboard Motion Timer
-            _keyMoveTimer.Interval = TimeSpan.FromMilliseconds(150);
+            _keyMoveTimer.Interval = TimeSpan.FromMilliseconds(100);
             _keyMoveTimer.Tick += KeyMoveTimer_Tick;
             _keyMoveTimer.Start();
         }
@@ -281,7 +281,8 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 if (!_pressedKeys.Contains(e.Key))
                 {
                     _pressedKeys.Add(e.Key);
-                    // Prevent key-repeat from firing multiple KeyDown events
+                    // Immediate Move for better responsiveness
+                    ExecuteMoveForKey(e.Key);
                     e.Handled = true;
                 }
             }
@@ -297,10 +298,21 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
         {
             if (!_isHotRegionActive || !_marlin.IsConnected || _pressedKeys.Count == 0) return;
 
+            // Continually move as long as keys are held
+            foreach (var key in _pressedKeys)
+                ExecuteMoveForKey(key);
+
+            UpdatePosUI();
+        }
+
+        private void ExecuteMoveForKey(Key k)
+        {
+            if (!_marlin.IsConnected) return;
+
             bool isCtrlDown = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
             double stepXY = 0;
             double stepZ = 0;
-            
+
             // XY Logic: No Ctrl = Rank 3 (+++), Ctrl = Rank 2 (++)
             if (isCtrlDown) double.TryParse(StepSize2.Text, out stepXY);
             else            double.TryParse(StepSize3.Text, out stepXY);
@@ -317,19 +329,17 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             }
 
             int fr = GetFeedRate();
-            bool moved = false;
 
-            // X/Y: Arrow Keys
-            if (_pressedKeys.Contains(Key.Up))    { _marlin.MoveRelativeY(stepXY, fr); moved = true; }
-            if (_pressedKeys.Contains(Key.Down))  { _marlin.MoveRelativeY(-stepXY, fr); moved = true; }
-            if (_pressedKeys.Contains(Key.Left))  { _marlin.MoveRelativeX(-stepXY, fr); moved = true; }
-            if (_pressedKeys.Contains(Key.Right)) { _marlin.MoveRelativeX(stepXY, fr); moved = true; }
-
-            // Z: PageUp (Z-) / PageDown (Z+) as requested
-            if (_pressedKeys.Contains(Key.PageUp)   || _pressedKeys.Contains(Key.Prior)) { _marlin.MoveRelativeZ(-stepZ, fr); moved = true; }
-            if (_pressedKeys.Contains(Key.PageDown) || _pressedKeys.Contains(Key.Next))  { _marlin.MoveRelativeZ(stepZ, fr); moved = true; }
-
-            if (moved) UpdatePosUI();
+            // Perform movement
+            switch (k)
+            {
+                case Key.Up:    _marlin.MoveRelativeY(stepXY, fr); break;
+                case Key.Down:  _marlin.MoveRelativeY(-stepXY, fr); break;
+                case Key.Left:  _marlin.MoveRelativeX(-stepXY, fr); break;
+                case Key.Right: _marlin.MoveRelativeX(stepXY, fr); break;
+                case Key.PageUp:   _marlin.MoveRelativeZ(-stepZ, fr); break;
+                case Key.PageDown: _marlin.MoveRelativeZ(stepZ, fr); break;
+            }
         }
 
         // ── Pre-Acquire Setup ─────────────────────────────────────────────────
