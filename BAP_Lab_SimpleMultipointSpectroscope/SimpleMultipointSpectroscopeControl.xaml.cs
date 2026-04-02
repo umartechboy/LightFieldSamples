@@ -107,7 +107,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             if (current != null && Array.IndexOf(ports, current) >= 0)
                 PortCombo.SelectedItem = current;
             else
-                PortCombo.SelectedIndex = 0;
+                PortCombo.SelectedIndex = ports.Length - 1;
 
             if (!_marlin.IsConnected)
             {
@@ -196,7 +196,26 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             if (tag.Length < 2) return;
             
             char axis = char.ToUpper(tag[0]);
-            if (!double.TryParse(tag.Substring(1), out double dist)) return;
+            string rest = tag.Substring(1);
+            bool negative = rest.StartsWith("-");
+            if (negative) rest = rest.Substring(1);
+            
+            if (!int.TryParse(rest, out int rank)) return;
+            
+            // Get value from corresponding textbox
+            double step = 0;
+            if (axis == 'Z')
+            {
+                TextBox tb = (rank == 1) ? ZStepSize1 : (rank == 2) ? ZStepSize2 : ZStepSize3;
+                double.TryParse(tb.Text, out step);
+            }
+            else
+            {
+                TextBox tb = (rank == 1) ? StepSize1 : (rank == 2) ? StepSize2 : StepSize3;
+                double.TryParse(tb.Text, out step);
+            }
+            
+            double dist = negative ? -step : step;
             int fr = GetFeedRate();
             
             if (axis == 'X') _marlin.MoveRelativeX(dist, fr);

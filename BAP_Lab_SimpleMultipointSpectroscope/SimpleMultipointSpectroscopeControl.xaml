@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="800" d:DesignWidth="400">
+             d:DesignHeight="800" d:DesignWidth="1106.5">
 
     <Grid>
         <TabControl Name="MainTabControl" Margin="4">
@@ -24,10 +24,15 @@
                             <!-- Image Acquisition -->
                             <GroupBox Header="Image Acquisition" Margin="0,0,0,8">
                                 <StackPanel Margin="4">
-                                    <Label Content="Settings Managed by LightField Experiment Panel" Foreground="Gray" Margin="0,0,0,8" FontStyle="Italic"/>
-                                    <Button Name="TestAcquireButton" Content="Test Acquire Image" Height="28" Margin="0,0,0,4" Click="TestAcquireButton_Click"/>
-                                    <TextBlock Name="AcqStatusText" Text="" Foreground="DarkGreen" Margin="0,6,0,0" TextWrapping="Wrap"/>
-                                    
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Settings Managed by LightField Experiment Panel" Foreground="Gray" FontStyle="Italic" VerticalAlignment="Center"/>
+                                        <Button Grid.Column="1" Name="TestAcquireButton" Content="Test Acquire Image" Height="28" Width="150" Click="TestAcquireButton_Click" VerticalAlignment="Center"/>
+                                    </Grid>
+
                                     <Border BorderBrush="Gray" BorderThickness="1" Background="Black" Height="150" Margin="0,8,0,0">
                                         <Image Name="SetupImageControl" Stretch="Uniform"/>
                                     </Border>
@@ -60,38 +65,62 @@
                                             <ColumnDefinition Width="40"/>
                                             <ColumnDefinition Width="40"/>
                                             <ColumnDefinition Width="40"/>
-                                            <ColumnDefinition Width="20"/> <!-- Spacer -->
+                                            <ColumnDefinition Width="20"/>
+                                            <!-- Spacer -->
                                             <ColumnDefinition Width="40"/>
+                                            <!-- Z buttons -->
+                                            <ColumnDefinition Width="40"/>
+                                            <!-- Z labels -->
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Y Axis Positive -->
-                                        <Button Grid.Row="0" Grid.Column="3" Content="Y+++" ToolTip="1.0 mm" Click="MoveBtn_Click" Tag="Y1.0" Width="38" Height="30" />
-                                        <Button Grid.Row="1" Grid.Column="3" Content="Y++" ToolTip="0.1 mm" Click="MoveBtn_Click" Tag="Y0.1" Width="38" Height="30" />
-                                        <Button Grid.Row="2" Grid.Column="3" Content="Y+" ToolTip="0.01 mm" Click="MoveBtn_Click" Tag="Y0.01" Width="38" Height="30" />
+                                        <Button Grid.Row="0" Grid.Column="3" Content="Y+++" Click="MoveBtn_Click" Tag="Y3" Width="38" Height="30" />
+                                        <Button Grid.Row="1" Grid.Column="3" Content="Y++" Click="MoveBtn_Click" Tag="Y2" Width="38" Height="30" />
+                                        <Button Grid.Row="2" Grid.Column="3" Content="Y+" Click="MoveBtn_Click" Tag="Y1" Width="38" Height="30" />
+
+                                        <!-- Increment Adjustors (Rank 1, 2, 3) -->
+                                        <TextBox   Name="StepSize3" Grid.Column="6" Text="1.0" Width="38" Height="22" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="Coarse Step Size"/>
+                                        <TextBox   Name="StepSize2" Grid.Row="1" Grid.Column="5" Text="0.1" Width="38" Height="22" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="Mid Step Size"/>
+                                        <TextBox   Name="StepSize1" Grid.Row="2" Grid.Column="4" Text="0.01" Width="38" Height="22" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="Fine Step Size"/>
 
                                         <!-- Horizontal Axis -->
-                                        <Button Grid.Row="3" Grid.Column="0" Content="X---" ToolTip="-1.0 mm" Click="MoveBtn_Click" Tag="X-1.0" Width="38" Height="38" />
-                                        <Button Grid.Row="3" Grid.Column="1" Content="X--" ToolTip="-0.1 mm" Click="MoveBtn_Click" Tag="X-0.1" Width="38" Height="38" />
-                                        <Button Grid.Row="3" Grid.Column="2" Content="X-" ToolTip="-0.01 mm" Click="MoveBtn_Click" Tag="X-0.01" Width="38" Height="38" />
-                                        
+                                        <Button Grid.Row="3" Grid.Column="0" Content="X---" Click="MoveBtn_Click" Tag="X-3" Width="38" Height="38" />
+                                        <Button Grid.Row="3" Grid.Column="1" Content="X--" Click="MoveBtn_Click" Tag="X-2" Width="38" Height="38" />
+                                        <Button Grid.Row="3" Grid.Column="2" Content="X-" Click="MoveBtn_Click" Tag="X-1" Width="38" Height="38" />
+
                                         <Button Grid.Row="3" Grid.Column="3" Content="Set Origin" Width="90" Height="40" Click="SetOrigin_Click"/>
-                                        
-                                        <Button Grid.Row="3" Grid.Column="4" Content="X+" ToolTip="0.01 mm" Click="MoveBtn_Click" Tag="X0.01" Width="38" Height="38" />
-                                        <Button Grid.Row="3" Grid.Column="5" Content="X++" ToolTip="0.1 mm" Click="MoveBtn_Click" Tag="X0.1" Width="38" Height="38" />
-                                        <Button Grid.Row="3" Grid.Column="6" Content="X+++" ToolTip="1.0 mm" Click="MoveBtn_Click" Tag="X1.0" Width="38" Height="38" />
+
+                                        <Button Grid.Row="3" Grid.Column="4" Content="X+" Click="MoveBtn_Click" Tag="X1" Width="38" Height="38" />
+                                        <Button Grid.Row="3" Grid.Column="5" Content="X++" Click="MoveBtn_Click" Tag="X2" Width="38" Height="38" />
+                                        <Button Grid.Row="3" Grid.Column="6" Content="X+++" Click="MoveBtn_Click" Tag="X3" Width="38" Height="38" />
+
+                                        <!-- Reference Labels (Negative side, mirroring TBs) -->
+                                        <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding ElementName=StepSize1, Path=Text}" Foreground="Gray" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,13,0,0"/>
+                                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ElementName=StepSize2, Path=Text}" Foreground="Gray" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,13,0,0"/>
+                                        <TextBlock Grid.Row="6" Text="{Binding ElementName=StepSize3, Path=Text}" Foreground="Gray" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,13,0,0"/>
 
                                         <!-- Y Axis Negative -->
-                                        <Button Grid.Row="4" Grid.Column="3" Content="Y-" ToolTip="-0.01 mm" Click="MoveBtn_Click" Tag="Y-0.01" Width="38" Height="30" />
-                                        <Button Grid.Row="5" Grid.Column="3" Content="Y--" ToolTip="-0.1 mm" Click="MoveBtn_Click" Tag="Y-0.1" Width="38" Height="30" />
-                                        <Button Grid.Row="6" Grid.Column="3" Content="Y---" ToolTip="-1.0 mm" Click="MoveBtn_Click" Tag="Y-1.0" Width="38" Height="30" />
+                                        <Button Grid.Row="4" Grid.Column="3" Content="Y-" Click="MoveBtn_Click" Tag="Y-1" Width="38" Height="30" />
+                                        <Button Grid.Row="5" Grid.Column="3" Content="Y--" Click="MoveBtn_Click" Tag="Y-2" Width="38" Height="30" />
+                                        <Button Grid.Row="6" Grid.Column="3" Content="Y---" Click="MoveBtn_Click" Tag="Y-3" Width="38" Height="30" />
 
                                         <!-- Z Axis -->
-                                        <Button Grid.Row="0" Grid.Column="8" Content="Z+++" ToolTip="1.0 mm" Click="MoveBtn_Click" Tag="Z1.0" Width="38" Height="30" />
-                                        <Button Grid.Row="1" Grid.Column="8" Content="Z++" ToolTip="0.1 mm" Click="MoveBtn_Click" Tag="Z0.1" Width="38" Height="30" />
-                                        <Button Grid.Row="2" Grid.Column="8" Content="Z+" ToolTip="0.01 mm" Click="MoveBtn_Click" Tag="Z0.01" Width="38" Height="30" />
-                                        <Button Grid.Row="4" Grid.Column="8" Content="Z-" ToolTip="-0.01 mm" Click="MoveBtn_Click" Tag="Z-0.01" Width="38" Height="30" />
-                                        <Button Grid.Row="5" Grid.Column="8" Content="Z--" ToolTip="-0.1 mm" Click="MoveBtn_Click" Tag="Z-0.1" Width="38" Height="30" />
-                                        <Button Grid.Row="6" Grid.Column="8" Content="Z---" ToolTip="-1.0 mm" Click="MoveBtn_Click" Tag="Z-1.0" Width="38" Height="30" />
+                                        <Button Grid.Row="0" Grid.Column="8" Content="Z+++" Click="MoveBtn_Click" Tag="Z3" Width="38" Height="30" />
+                                        <Button Grid.Row="1" Grid.Column="8" Content="Z++" Click="MoveBtn_Click" Tag="Z2" Width="38" Height="30" />
+                                        <Button Grid.Row="2" Grid.Column="8" Content="Z+" Click="MoveBtn_Click" Tag="Z1" Width="38" Height="30" />
+                                        <Button Grid.Row="4" Grid.Column="8" Content="Z-" Click="MoveBtn_Click" Tag="Z-1" Width="38" Height="30" />
+                                        <Button Grid.Row="5" Grid.Column="8" Content="Z--" Click="MoveBtn_Click" Tag="Z-2" Width="38" Height="30" />
+                                        <Button Grid.Row="6" Grid.Column="8" Content="Z---" Click="MoveBtn_Click" Tag="Z-3" Width="38" Height="30" />
+
+                                        <!-- Z Increment Adjustors (Rank 1, 2, 3) -->
+                                        <TextBox   Name="ZStepSize3" Grid.Row="0" Grid.Column="9" Text="1.0" Width="38" Height="22" VerticalAlignment="Top" HorizontalAlignment="Center" ToolTip="Z Coarse" Margin="0,8,0,0"/>
+                                        <TextBox   Name="ZStepSize2" Grid.Row="1" Grid.Column="9" Text="0.1" Width="38" Height="22" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="Z Mid"/>
+                                        <TextBox   Name="ZStepSize1" Grid.Row="2" Grid.Column="9" Text="0.01" Width="38" Height="22" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="Z Fine"/>
+
+                                        <!-- Z Reference Labels (Negative side, mirroring Z TBs) -->
+                                        <TextBlock Grid.Row="4" Grid.Column="9" Text="{Binding ElementName=ZStepSize1, Path=Text}" Foreground="Gray" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Row="5" Grid.Column="9" Text="{Binding ElementName=ZStepSize2, Path=Text}" Foreground="Gray" FontSize="9" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,10"/>
+                                        <TextBlock Grid.Row="6" Grid.Column="9" Text="{Binding ElementName=ZStepSize3, Path=Text}" Foreground="Gray" FontSize="9" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,10"/>
                                     </Grid>
                                 </StackPanel>
                             </GroupBox>
@@ -127,11 +156,11 @@
                                         <ComboBoxItem Content="115200"/>
                                         <ComboBoxItem IsSelected="True" Content="250000"/>
                                     </ComboBox>
-                                    
+
                                     <Button Grid.Row="1" Grid.Column="2" Name="ConnectButton" Content="Connect" Margin="0,2,0,2" Click="ConnectButton_Click"/>
 
                                     <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Name="SerialStatusText" Text="Status: disconnected" Foreground="Gray" Margin="4,6,4,2"/>
-                                    
+
                                     <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,4,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -218,7 +247,7 @@
 
                                     <Label Grid.Row="4" Grid.Column="0" Content="Dwell (ms):" VerticalAlignment="Center"/>
                                     <TextBox Grid.Row="4" Grid.Column="1" Name="GridDwellMs" Text="500" Margin="0,2,0,2"/>
-                                    
+
                                     <Label Grid.Row="5" Grid.Column="0" Content="Pattern:" VerticalAlignment="Center"/>
                                     <ComboBox Grid.Row="5" Grid.Column="1" Name="GridPatternCombo" Margin="0,2,0,2">
                                         <ComboBoxItem IsSelected="True" Content="Row-by-Row"/>
@@ -226,11 +255,11 @@
                                         <ComboBoxItem Content="Serpentine Row"/>
                                         <ComboBoxItem Content="Serpentine Column"/>
                                     </ComboBox>
-                                    
+
                                     <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,6,0,2">
                                         <CheckBox Name="StaggeredCheck" Content="Staggered Grid" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </StackPanel>
-                                    
+
                                     <Grid Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,6,0,2">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -321,7 +350,7 @@
             <TabItem Header="Export">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="8" Width="360" HorizontalAlignment="Left">
-                        
+
                         <!-- Output Folder -->
                         <GroupBox Header="Output Folder" Margin="0,0,0,8">
                             <Grid Margin="4">
@@ -340,7 +369,7 @@
                                 <TextBlock Name="ExportStatusText" Text="Wait for scan to complete." Foreground="Gray"/>
                             </StackPanel>
                         </GroupBox>
-                        
+
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
