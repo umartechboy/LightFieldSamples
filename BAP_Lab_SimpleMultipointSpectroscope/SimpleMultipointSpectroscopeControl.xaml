@@ -29,10 +29,15 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <Label Content="Settings Managed by LightField Experiment Panel" Foreground="Gray" FontStyle="Italic" VerticalAlignment="Center"/>
-                                        <CheckBox Grid.Column="1" Name="LiveVideoCheckBox" Content="Live Video" VerticalAlignment="Center" Margin="10,0,10,0" Checked="LiveVideo_Checked" Unchecked="LiveVideo_Unchecked"/>
-                                        <Button Grid.Column="2" Name="TestAcquireButton" Content="Test Acquire Image" Height="28" Width="150" Click="TestAcquireButton_Click" VerticalAlignment="Center"/>
+                                        <Label Content="Display Mode:" Foreground="Gray" FontStyle="Italic" VerticalAlignment="Center"/>
+                                        <ComboBox Grid.Column="1" Name="DisplayTypeCombo" Width="100" Margin="0,0,10,0" SelectedIndex="0" VerticalAlignment="Center">
+                                            <ComboBoxItem Content="Image"/>
+                                            <ComboBoxItem Content="Spectrum"/>
+                                        </ComboBox>
+                                        <CheckBox Grid.Column="2" Name="LiveVideoCheckBox" Content="Live Video" VerticalAlignment="Center" Margin="10,0,10,0" Checked="LiveVideo_Checked" Unchecked="LiveVideo_Unchecked"/>
+                                        <Button Grid.Column="3" Name="TestAcquireButton" Content="Test Acquire Image" Height="28" Width="150" Click="TestAcquireButton_Click" VerticalAlignment="Center"/>
                                     </Grid>
 
                                     <Border BorderBrush="Gray" BorderThickness="1" Background="Black" Height="150" Margin="0,8,0,0">

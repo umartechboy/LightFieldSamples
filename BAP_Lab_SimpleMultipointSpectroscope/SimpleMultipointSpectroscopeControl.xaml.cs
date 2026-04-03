@@ -391,8 +391,15 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                     {
                         _lastDataSet?.Dispose();
                         _lastDataSet = dataSet;
+                        
+                        IImageData frame = dataSet.GetFrame(0, 0);
+                        bool showSpectrum = DisplayTypeCombo.SelectedIndex == 1;
+                        
+                        WriteableBitmap bmp = showSpectrum ? CreateSpectrumBitmap(frame) : CreateDisplayBitmap(frame);
+                        SetupImageControl.Source = bmp;
+                        
+                        // Also update scan tab preview if scanning (though this loop is for Setup tab)
                         UpdateLiveImageFrame(dataSet);
-                        SetupImageControl.Source = CreateDisplayBitmap(dataSet.GetFrame(0, 0));
                     }
                     
                     await Task.Delay(10);
@@ -430,11 +437,15 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 _lastDataSet?.Dispose();
                 _lastDataSet = dataSet;
 
-                // Push to live Image preview 
+                // Push to live Image preview (Scan Tab)
                 UpdateLiveImageFrame(dataSet);
                 
-                // Show acquired image on Setup tab panel too
-                SetupImageControl.Source = CreateDisplayBitmap(dataSet.GetFrame(0, 0));
+                // Show on Setup tab based on selection
+                IImageData frame = dataSet.GetFrame(0, 0);
+                if (DisplayTypeCombo.SelectedIndex == 1)
+                    SetupImageControl.Source = CreateSpectrumBitmap(frame);
+                else
+                    SetupImageControl.Source = CreateDisplayBitmap(frame);
 
                 // Push to LightField built-in display
                 IDisplayViewer viewer = _app.DisplayManager?.GetDisplay(DisplayLocation.ExperimentWorkspace, 0);
@@ -968,6 +979,70 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 LiveImageControl.Source = bmp;
             }
             catch { /* Ignore draw errors */ }
+        }
+        
+        private WriteableBitmap CreateSpectrumBitmap(IImageData frame)
+        {
+            Array rawData = frame.GetData();
+            int width = frame.Width;
+            int height = frame.Height;
+            
+            // Output bitmap height (match the UI border height roughly or fixed)
+            int dispH = 150;
+            WriteableBitmap bmp = new WriteableBitmap(width, dispH, 96, 96, PixelFormats.Bgr32, null);
+            
+            // 1. Calculate Averages
+            double[] averages = new double[width];
+            double maxAvg = 1;
+            for (int x = 0; x < width; x++)
+            {
+                double sum = 0;
+                for (int y = 0; y < height; y++)
+                {
+                    double val = Convert.ToDouble(rawData.GetValue(y * width + x));
+                    sum += val;
+                }
+                averages[x] = sum / height;
+                if (averages[x] > maxAvg) maxAvg = averages[x];
+            }
+
+            // 2. Prepare pixel buffer (Black background)
+            int stride = bmp.BackBufferStride / 4;
+            int[] pixels = new int[stride * dispH];
+            
+            // 3. Draw Graph (Yellow line)
+            int lastY = -1;
+            for (int x = 0; x < width; x++)
+            {
+                // Normalize to height
+                int barH = (int)((averages[x] / maxAvg) * (dispH - 10));
+                int currentY = dispH - 1 - barH;
+                
+                if (currentY < 0) currentY = 0;
+                if (currentY >= dispH) currentY = dispH - 1;
+
+                if (lastY == -1) // First pixel
+                {
+                    pixels[currentY * stride + x] = 0xFFFF00; // Red+Green=Yellow
+                }
+                else
+                {
+                    // Draw vertical segment from lastY to currentY to make it look continuous
+                    int yStart = Math.Min(lastY, currentY);
+                    int yEnd = Math.Max(lastY, currentY);
+                    for (int y = yStart; y <= yEnd; y++)
+                    {
+                        pixels[y * stride + x] = 0xFFFF00;
+                    }
+                }
+                lastY = currentY;
+            }
+
+            bmp.Lock();
+            Marshal.Copy(pixels, 0, bmp.BackBuffer, pixels.Length);
+            bmp.AddDirtyRect(new Int32Rect(0, 0, width, dispH));
+            bmp.Unlock();
+            return bmp;
         }
 
         private WriteableBitmap CreateDisplayBitmap(IImageData frame)
