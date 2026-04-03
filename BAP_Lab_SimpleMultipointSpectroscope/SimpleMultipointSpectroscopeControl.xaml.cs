@@ -975,7 +975,9 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             try
             {
                 IImageData frame = dataset.GetFrame(0, 0);
-                WriteableBitmap bmp = CreateDisplayBitmap(frame);
+                bool showSpectrum = (ScanDisplayTypeCombo != null && ScanDisplayTypeCombo.SelectedIndex == 1);
+                
+                WriteableBitmap bmp = showSpectrum ? CreateSpectrumBitmap(frame) : CreateDisplayBitmap(frame);
                 LiveImageControl.Source = bmp;
             }
             catch { /* Ignore draw errors */ }

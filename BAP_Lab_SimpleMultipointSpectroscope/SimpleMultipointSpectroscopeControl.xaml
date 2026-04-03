@@ -355,9 +355,19 @@
                                 </StackPanel>
                             </GroupBox>
 
-                            <!-- Live Image View -->
                             <GroupBox Header="Live Image Check" Margin="0,0,0,8" VerticalAlignment="Stretch">
                                 <StackPanel Margin="4">
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Mode:" Foreground="Gray" VerticalAlignment="Center"/>
+                                        <ComboBox Grid.Column="1" Name="ScanDisplayTypeCombo" SelectedIndex="0" VerticalAlignment="Center">
+                                            <ComboBoxItem Content="Image"/>
+                                            <ComboBoxItem Content="Spectrum"/>
+                                        </ComboBox>
+                                    </Grid>
                                     <Border BorderBrush="Gray" BorderThickness="1" Background="Black" Height="150" HorizontalAlignment="Stretch">
                                         <Image Name="LiveImageControl" Stretch="Uniform"/>
                                     </Border>
