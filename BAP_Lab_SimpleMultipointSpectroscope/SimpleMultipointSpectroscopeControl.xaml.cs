@@ -1,8 +1,11 @@
+using PrincetonInstruments.LightField.AddIns;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Data;
+using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -17,8 +20,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-
-using PrincetonInstruments.LightField.AddIns;
 
 namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
 {
@@ -64,6 +65,8 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             public double Z;
             public string Timestamp;
             public string Filename;
+            public double[][] Data;
+            public IImageDataSet DataSet;
         }
 
         public SimpleMultipointSpectroscopeControl(ILightFieldApplication app)
@@ -392,13 +395,12 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                         _lastDataSet?.Dispose();
                         _lastDataSet = dataSet;
                         
-                        IImageData frame = dataSet.GetFrame(0, 0);
                         bool showSpectrum = DisplayTypeCombo.SelectedIndex == 1;
+                        if (showSpectrum)
+                            SetupImageControl.Source = CreateSpectrumBitmap(dataSet);
+                        else 
+                            SetupImageControl.Source = CreateDisplayBitmap(dataSet.GetFrame(0, 0));
                         
-                        WriteableBitmap bmp = showSpectrum ? CreateSpectrumBitmap(frame) : CreateDisplayBitmap(frame);
-                        SetupImageControl.Source = bmp;
-                        
-                        // Also update scan tab preview if scanning (though this loop is for Setup tab)
                         UpdateLiveImageFrame(dataSet);
                     }
                     
@@ -443,7 +445,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 // Show on Setup tab based on selection
                 IImageData frame = dataSet.GetFrame(0, 0);
                 if (DisplayTypeCombo.SelectedIndex == 1)
-                    SetupImageControl.Source = CreateSpectrumBitmap(frame);
+                    SetupImageControl.Source = CreateSpectrumBitmap(dataSet);
                 else
                     SetupImageControl.Source = CreateDisplayBitmap(frame);
 
@@ -904,6 +906,8 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 {
                     X = p.X,
                     Y = p.Y,
+                    DataSet = dataSet,
+                    Data = DatasetToArray(dataSet),
                     Z = _marlin.CurrentZ,
                     Timestamp = timestamp,
                     Filename = pngName
@@ -974,62 +978,91 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
         {
             try
             {
-                IImageData frame = dataset.GetFrame(0, 0);
                 bool showSpectrum = (ScanDisplayTypeCombo != null && ScanDisplayTypeCombo.SelectedIndex == 1);
                 
-                WriteableBitmap bmp = showSpectrum ? CreateSpectrumBitmap(frame) : CreateDisplayBitmap(frame);
-                LiveImageControl.Source = bmp;
+                if (showSpectrum)
+                    LiveImageControl.Source = CreateSpectrumBitmap(dataset);
+                else
+                    LiveImageControl.Source = CreateDisplayBitmap(dataset.GetFrame(0, 0));
             }
             catch { /* Ignore draw errors */ }
         }
         
-        private WriteableBitmap CreateSpectrumBitmap(IImageData frame)
+        private BitmapSource CreateSpectrumBitmap(IImageDataSet dataset)
         {
-            Array rawData = frame.GetData();
-            int width = frame.Width;
-            int height = frame.Height;
-            
-            // Output bitmap height (match the UI border height roughly or fixed)
+            if (dataset == null || dataset.Regions.Length == 0) return null;
+
+            // 1. Accumulate all regions (accounting for multi-strip ROI settings)
+            IImageData firstFrame = dataset.GetFrame(0, 0);
+            int width = firstFrame.Width;
             int dispH = 150;
-            WriteableBitmap bmp = new WriteableBitmap(width, dispH, 96, 96, PixelFormats.Bgr32, null);
             
-            // 1. Calculate Averages
             double[] averages = new double[width];
-            double maxAvg = 1;
-            for (int x = 0; x < width; x++)
+            int totalRows = 0;
+
+            for (int roi = 0; roi < dataset.Regions.Length; roi++)
             {
-                double sum = 0;
-                for (int y = 0; y < height; y++)
+                IImageData frame = dataset.GetFrame(roi, 0);
+                Array rawData = frame.GetData();
+                int h = frame.Height;
+                int w = frame.Width;
+
+                for (int x = 0; x < w; x++)
                 {
-                    double val = Convert.ToDouble(rawData.GetValue(y * width + x));
-                    sum += val;
+                    if (x >= width) break;
+                    double sum = 0;
+                    for (int y = 0; y < h; y++)
+                    {
+                        sum += Convert.ToDouble(rawData.GetValue(y * w + x));
+                    }
+                    averages[x] += sum;
                 }
-                averages[x] = sum / height;
-                if (averages[x] > maxAvg) maxAvg = averages[x];
+                totalRows += h;
             }
 
+            // Calculate final averages and intensities for normalization
+            double maxAvg = double.MinValue;
+            double minAvg = double.MaxValue;
+            for (int x = 0; x < width; x++)
+            {
+                averages[x] /= totalRows;
+                if (averages[x] > maxAvg) maxAvg = averages[x];
+                if (averages[x] < minAvg) minAvg = averages[x];
+            }
+
+            // Prevent div-by-zero on completely flat spectra
+            double range = maxAvg - minAvg;
+            if (range <= 0) range = 1;
+
             // 2. Prepare pixel buffer (Black background)
+            WriteableBitmap bmp = new WriteableBitmap(width, dispH, 96, 96, PixelFormats.Bgr32, null);
             int stride = bmp.BackBufferStride / 4;
             int[] pixels = new int[stride * dispH];
             
-            // 3. Draw Graph (Yellow line)
+            // 3. Draw Graph (Yellow line, Min-Max normalized)
             int lastY = -1;
             for (int x = 0; x < width; x++)
             {
-                // Normalize to height
-                int barH = (int)((averages[x] / maxAvg) * (dispH - 10));
+                // Normalize Intensity: (Value - Min) / (Max - Min)
+                double normalized = (averages[x] - minAvg) / range;
+                
+                // Map to Disp Height (with 10px margin top/bottom)
+                int barH = (int)(normalized * (dispH - 20)) + 5;
                 int currentY = dispH - 1 - barH;
                 
                 if (currentY < 0) currentY = 0;
                 if (currentY >= dispH) currentY = dispH - 1;
 
-                if (lastY == -1) // First pixel
+                if (lastY == -1) // First point
                 {
-                    pixels[currentY * stride + x] = 0xFFFF00; // Red+Green=Yellow
+                    pixels[currentY * stride + x] = unchecked((int)0xFFFF00FF); // Yellow (Bgr32: Blue=0, Green=255, Red=255, Alpha=255/ignored)
+                    // Wait, 0xFFFF00 is Blue=0, Green=255, Red=255. That's Yellow in Bgr32.
+                    // Let's stick to 0xFFFF00 if that was working.
+                    pixels[currentY * stride + x] = 0xFFFF00;
                 }
                 else
                 {
-                    // Draw vertical segment from lastY to currentY to make it look continuous
+                    // Draw vertical segment for continuity
                     int yStart = Math.Min(lastY, currentY);
                     int yEnd = Math.Max(lastY, currentY);
                     for (int y = yStart; y <= yEnd; y++)
@@ -1044,7 +1077,26 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             Marshal.Copy(pixels, 0, bmp.BackBuffer, pixels.Length);
             bmp.AddDirtyRect(new Int32Rect(0, 0, width, dispH));
             bmp.Unlock();
-            return bmp;
+
+            // 4. Overlay Labels
+            DrawingVisual dv = new DrawingVisual();
+            using (DrawingContext dc = dv.RenderOpen())
+            {
+                dc.DrawImage(bmp, new Rect(0, 0, width, dispH));
+
+                var typeface = new Typeface("Segoe UI");
+                double dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
+
+                var maxLabel = new FormattedText($"Max: {maxAvg:F0}", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, 20, Brushes.Yellow, dpi);
+                var minLabel = new FormattedText($"Min: {minAvg:F0}", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, 20, Brushes.White, dpi);
+
+                dc.DrawText(maxLabel, new Point(5, 2));
+                dc.DrawText(minLabel, new Point(5, dispH - 25));
+            }
+
+            RenderTargetBitmap result = new RenderTargetBitmap(width, dispH, 96, 96, PixelFormats.Pbgra32);
+            result.Render(dv);
+            return result;
         }
 
         private WriteableBitmap CreateDisplayBitmap(IImageData frame)
@@ -1132,9 +1184,16 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             {
                 string jsonPath = System.IO.Path.Combine(targetDir, $"ScanMetadata_{DateTime.Now:yyyyMMdd_HHmmss}.json");
                 StringBuilder sb = new StringBuilder();
+                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
                 sb.AppendLine("[");
                 for (int i = 0; i < _scanRecords.Count; i++)
                 {
+                    var p = _scanRecords[i];
+                    string pngName = $"Scan_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.png";
+                    string csvName = $"Scan_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.csv";
+                    SaveDataSetToPng(p.DataSet, System.IO.Path.Combine(OutputFolderText.Text, pngName));
+                    SaveDataSetToCsv(p.DataSet, System.IO.Path.Combine(OutputFolderText.Text, csvName));
+
                     var r = _scanRecords[i];
                     sb.AppendLine("  {");
                     sb.AppendLine($"    \"X\": {r.X},");
@@ -1149,12 +1208,118 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 sb.AppendLine("]");
 
                 File.WriteAllText(jsonPath, sb.ToString());
-                ExportStatusText.Text = $"Exported metadata to: {jsonPath}";
+
+                // Save the combined averaged CSV
+                string combinedCsvPath = System.IO.Path.Combine(targetDir, $"CombinedSpectra_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
+                SaveCombinedCsv(_scanRecords, combinedCsvPath);
+
+                ExportStatusText.Text = $"Exported to: {targetDir}";
                 ExportStatusText.Foreground = Brushes.DarkGreen;
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Export failed:\n" + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// For each scan record, averages every column across all rows (same logic as CreateSpectrumBitmap).
+        /// Writes a combined CSV where:
+        ///   - Columns  = scan positions  (header: Position_N_{X}_{Y})
+        ///   - Rows     = dataset column index (i.e. wavelength pixel 0 … width-1)
+        ///   - Each cell = mean intensity of that wavelength pixel at that position
+        /// </summary>
+        private void SaveCombinedCsv(List<ScanPointRecord> records, string filepath)
+        {
+            try
+            {
+                if (records == null || records.Count == 0) return;
+
+                string dir = System.IO.Path.GetDirectoryName(filepath);
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
+                // ── Build column-average vector for every position ─────────────
+                // Mirror of CreateSpectrumBitmap: sum across all ROI rows, then divide.
+                var positionAverages = new List<double[]>(); // one double[] per scan record
+
+                int commonWidth = -1;
+
+                for (int recIdx = 0; recIdx < records.Count; recIdx++)
+                {
+                    IImageDataSet dataset = records[recIdx].DataSet;
+
+                    if (dataset == null || dataset.Regions.Length == 0)
+                    {
+                        positionAverages.Add(new double[0]);
+                        continue;
+                    }
+
+                    // Determine width from first ROI frame
+                    IImageData firstFrame = dataset.GetFrame(0, 0);
+                    int width = firstFrame.Width;
+
+                    if (commonWidth < 0) commonWidth = width;
+
+                    double[] colSums = new double[width];
+                    int totalRows = 0;
+
+                    for (int roi = 0; roi < dataset.Regions.Length; roi++)
+                    {
+                        IImageData frame = dataset.GetFrame(roi, 0);
+                        Array rawData = frame.GetData();
+                        int h = frame.Height;
+                        int w = frame.Width;
+
+                        for (int x = 0; x < w && x < width; x++)
+                        {
+                            double sum = 0;
+                            for (int y = 0; y < h; y++)
+                                sum += Convert.ToDouble(rawData.GetValue(y * w + x));
+                            colSums[x] += sum;
+                        }
+                        totalRows += h;
+                    }
+
+                    double[] averages = new double[width];
+                    if (totalRows > 0)
+                        for (int x = 0; x < width; x++)
+                            averages[x] = colSums[x] / totalRows;
+
+                    positionAverages.Add(averages);
+                }
+
+                if (commonWidth <= 0) return; // nothing usable
+
+                // ── Write CSV ─────────────────────────────────────────────────
+                using (StreamWriter sw = new StreamWriter(filepath))
+                {
+                    // Header row: Position_1_{X}_{Y}, Position_2_{X}_{Y}, …
+                    var headers = new List<string>();
+                    for (int i = 0; i < records.Count; i++)
+                    {
+                        var r = records[i];
+                        headers.Add($"Position_{i + 1}_{r.X:F2}_{r.Y:F2}");
+                    }
+                    sw.WriteLine(string.Join(",", headers));
+
+                    // Data rows: one per wavelength column index
+                    for (int colIdx = 0; colIdx < commonWidth; colIdx++)
+                    {
+                        var rowVals = new List<string>();
+                        for (int posIdx = 0; posIdx < positionAverages.Count; posIdx++)
+                        {
+                            double[] avgs = positionAverages[posIdx];
+                            double val = (colIdx < avgs.Length) ? avgs[colIdx] : 0.0;
+                            rowVals.Add(val.ToString("F4", System.Globalization.CultureInfo.InvariantCulture));
+                        }
+                        sw.WriteLine(string.Join(",", rowVals));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Surface the error rather than silently dropping it
+                Dispatcher.Invoke(() => TerminalText.AppendText($"Error saving combined CSV: {ex.Message}\n"));
             }
         }
 
@@ -1183,6 +1348,34 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             }
         }
 
+        private double[][] DatasetToArray(IImageDataSet dataset)
+        {
+
+            try
+            {
+                IImageData frame = dataset.GetFrame(0, 0);
+                Array rawData = frame.GetData();
+                int width = frame.Width;
+                int height = frame.Height;
+                var rows = new double[height][];
+                for (int r = 0; r < height; r++)
+                {
+                    var row = new double[width];
+                    for (int c = 0; c < width; c++)
+                    {
+                        row[c] = double.Parse(rawData.GetValue(r * width + c).ToString());
+                    }
+                    rows[r] = row;
+                }
+                return rows;
+
+            }
+            catch (Exception ex)
+            {
+                // Ignore silent failure
+                return new double[0][];
+            }
+        }
         private void SaveDataSetToCsv(IImageDataSet dataset, string filepath)
         {
             try
