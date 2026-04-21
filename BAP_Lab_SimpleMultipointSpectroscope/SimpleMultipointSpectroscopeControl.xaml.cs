@@ -21,6 +21,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+using System.Xml;
+using System.Xml.XPath;
+
 namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
 {
     public class ScanPointUI : INotifyPropertyChanged
@@ -65,8 +68,9 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             public double Z;
             public string Timestamp;
             public string Filename;
-            public double[][] Data;
-            public IImageDataSet DataSet;
+            public double[] Wavelengths;
+            public double[] CombinedAverages;
+            public List<double[][]> AllRoiData;
         }
 
         public SimpleMultipointSpectroscopeControl(ILightFieldApplication app)
@@ -805,7 +809,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
 
         private async void StartScanButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!_marlin.IsConnected) { MessageBox.Show("Please connect serial port in Setup tab."); return; }
+            if (!_marlin.IsConnected) { MessageBox.Show("Please connect serial port in Setup tab."); }
             if (_gridPoints.Count == 0) { MessageBox.Show("Please generate or add points to the grid first."); return; }
             if (!ValidateAcquisition()) return;
 
@@ -841,7 +845,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Scan error: " + ex.Message);
+                MessageBox.Show("Scan error: " + ex);
             }
             finally
             {
@@ -869,8 +873,11 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 ScanPointUI p = path[i];
                 
                 // 1) Move Stage
-                _marlin.MoveXY(p.X, p.Y, feedRate);
-                _marlin.WaitForMotion(); // M400
+                if (_marlin.IsConnected)
+                {
+                    _marlin.MoveXY(p.X, p.Y, feedRate);
+                    _marlin.WaitForMotion(); // M400
+                }
                 Thread.Sleep(dwellMs);   // Hardware settling
                 
                 // 2) Update UI that we arrived
@@ -892,26 +899,32 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
 
                 // 4) Save memory immediately
                 string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
-                string pngName = $"Scan_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.png";
-                string csvName = $"Scan_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.csv";
-                
+            
                 Dispatcher.Invoke(() => {
-                    SaveDataSetToPng(dataSet, System.IO.Path.Combine(OutputFolderText.Text, pngName));
-                    SaveDataSetToCsv(dataSet, System.IO.Path.Combine(OutputFolderText.Text, csvName));
+                    string seed = ExportSeedText.Text;
+                    string pngName = $"{seed}_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.png";
+                    string csvName = $"{seed}_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.csv";
+
+                    if (ExportIndividualCheck.IsChecked == true)
+                        SaveDataSetToPng(dataSet, System.IO.Path.Combine(OutputFolderText.Text, pngName));
+                    if (ExportIndividualCsvCheck.IsChecked == true)
+                        SaveDataSetToCsv(dataSet, System.IO.Path.Combine(OutputFolderText.Text, csvName));
+
                     ScanProgressBar.Value = i + 1;
+                    // 5) Record memory (Cache primitive data to avoid disposal issues)
+                    _scanRecords.Add(new ScanPointRecord
+                    {
+                        X = p.X,
+                        Y = p.Y,
+                        Z = _marlin.CurrentZ,
+                        Timestamp = timestamp,
+                        Filename = pngName,
+                        Wavelengths = GetWavelengths(dataSet),
+                        CombinedAverages = GetCombinedAverages(dataSet),
+                        AllRoiData = GetAllRoiData(dataSet)
+                    });
                 });
 
-                // 5) Record memory
-                _scanRecords.Add(new ScanPointRecord
-                {
-                    X = p.X,
-                    Y = p.Y,
-                    DataSet = dataSet,
-                    Data = DatasetToArray(dataSet),
-                    Z = _marlin.CurrentZ,
-                    Timestamp = timestamp,
-                    Filename = pngName
-                });
             }
 
             // 6) Auto-Export Metadata
@@ -928,7 +941,8 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 string targetDir = OutputFolderText.Text;
                 if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
-                string jsonPath = System.IO.Path.Combine(targetDir, $"ScanMetadata_{DateTime.Now:yyyyMMdd_HHmmss}.json");
+                string seed = ExportSeedText.Text;
+                string jsonPath = System.IO.Path.Combine(targetDir, $"{seed}_Metadata_{DateTime.Now:yyyyMMdd_HHmmss}.json");
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine("{");
                 
@@ -1182,25 +1196,29 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
 
             try
             {
-                string jsonPath = System.IO.Path.Combine(targetDir, $"ScanMetadata_{DateTime.Now:yyyyMMdd_HHmmss}.json");
+                string seed = ExportSeedText.Text;
+                string jsonPath = System.IO.Path.Combine(targetDir, $"{seed}_Metadata_{DateTime.Now:yyyyMMdd_HHmmss}.json");
                 StringBuilder sb = new StringBuilder();
                 string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
                 sb.AppendLine("[");
                 for (int i = 0; i < _scanRecords.Count; i++)
                 {
                     var p = _scanRecords[i];
-                    string pngName = $"Scan_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.png";
-                    string csvName = $"Scan_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.csv";
-                    SaveDataSetToPng(p.DataSet, System.IO.Path.Combine(OutputFolderText.Text, pngName));
-                    SaveDataSetToCsv(p.DataSet, System.IO.Path.Combine(OutputFolderText.Text, csvName));
+                    string pngName = $"{seed}_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.png";
+                    string csvName = $"{seed}_X{p.X:F1}_Y{p.Y:F1}_{timestamp}.csv";
 
-                    var r = _scanRecords[i];
+                    // Note: PNGs were already saved during the scan. 
+                    // If the user wants to re-export to a NEW folder, we should copy them or re-acquire.
+                    // For now, we only re-export the CSVs using cached data.
+                    if (ExportIndividualCsvCheck.IsChecked == true)
+                        SaveCachedDataToCsv(p, System.IO.Path.Combine(OutputFolderText.Text, csvName));
+
                     sb.AppendLine("  {");
-                    sb.AppendLine($"    \"X\": {r.X},");
-                    sb.AppendLine($"    \"Y\": {r.Y},");
-                    sb.AppendLine($"    \"Z\": {r.Z},");
-                    sb.AppendLine($"    \"Timestamp\": \"{r.Timestamp}\",");
-                    sb.AppendLine($"    \"Filename\": \"{r.Filename}\"");
+                    sb.AppendLine($"    \"X\": {p.X},");
+                    sb.AppendLine($"    \"Y\": {p.Y},");
+                    sb.AppendLine($"    \"Z\": {p.Z},");
+                    sb.AppendLine($"    \"Timestamp\": \"{p.Timestamp}\",");
+                    sb.AppendLine($"    \"Filename\": \"{p.Filename}\"");
                     sb.Append("  }");
                     if (i < _scanRecords.Count - 1) sb.Append(",");
                     sb.AppendLine();
@@ -1210,8 +1228,11 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 File.WriteAllText(jsonPath, sb.ToString());
 
                 // Save the combined averaged CSV
-                string combinedCsvPath = System.IO.Path.Combine(targetDir, $"CombinedSpectra_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
-                SaveCombinedCsv(_scanRecords, combinedCsvPath);
+                if (ExportCombinedCheck.IsChecked == true)
+                {
+                    string combinedCsvPath = System.IO.Path.Combine(targetDir, $"{seed}_CombinedSpectra_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
+                    SaveCombinedCsv(_scanRecords, combinedCsvPath);
+                }
 
                 ExportStatusText.Text = $"Exported to: {targetDir}";
                 ExportStatusText.Foreground = Brushes.DarkGreen;
@@ -1239,62 +1260,24 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
                 // ── Build column-average vector for every position ─────────────
-                // Mirror of CreateSpectrumBitmap: sum across all ROI rows, then divide.
-                var positionAverages = new List<double[]>(); // one double[] per scan record
-
                 int commonWidth = -1;
-
-                for (int recIdx = 0; recIdx < records.Count; recIdx++)
+                foreach (var r in records)
                 {
-                    IImageDataSet dataset = records[recIdx].DataSet;
-
-                    if (dataset == null || dataset.Regions.Length == 0)
+                    if (r.CombinedAverages != null)
                     {
-                        positionAverages.Add(new double[0]);
-                        continue;
+                        commonWidth = r.CombinedAverages.Length;
+                        break;
                     }
-
-                    // Determine width from first ROI frame
-                    IImageData firstFrame = dataset.GetFrame(0, 0);
-                    int width = firstFrame.Width;
-
-                    if (commonWidth < 0) commonWidth = width;
-
-                    double[] colSums = new double[width];
-                    int totalRows = 0;
-
-                    for (int roi = 0; roi < dataset.Regions.Length; roi++)
-                    {
-                        IImageData frame = dataset.GetFrame(roi, 0);
-                        Array rawData = frame.GetData();
-                        int h = frame.Height;
-                        int w = frame.Width;
-
-                        for (int x = 0; x < w && x < width; x++)
-                        {
-                            double sum = 0;
-                            for (int y = 0; y < h; y++)
-                                sum += Convert.ToDouble(rawData.GetValue(y * w + x));
-                            colSums[x] += sum;
-                        }
-                        totalRows += h;
-                    }
-
-                    double[] averages = new double[width];
-                    if (totalRows > 0)
-                        for (int x = 0; x < width; x++)
-                            averages[x] = colSums[x] / totalRows;
-
-                    positionAverages.Add(averages);
                 }
 
-                if (commonWidth <= 0) return; // nothing usable
+                if (commonWidth <= 0) return;
 
                 // ── Write CSV ─────────────────────────────────────────────────
                 using (StreamWriter sw = new StreamWriter(filepath))
                 {
-                    // Header row: Position_1_{X}_{Y}, Position_2_{X}_{Y}, …
+                    // Header row: Wavelength, Position_1_{X}_{Y}, Position_2_{X}_{Y}, …
                     var headers = new List<string>();
+                    headers.Add("Wavelength");
                     for (int i = 0; i < records.Count; i++)
                     {
                         var r = records[i];
@@ -1306,11 +1289,19 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                     for (int colIdx = 0; colIdx < commonWidth; colIdx++)
                     {
                         var rowVals = new List<string>();
-                        for (int posIdx = 0; posIdx < positionAverages.Count; posIdx++)
+                        
+                        // First column: Wavelength value
+                        var firstRecordWithWavelengths = records.FirstOrDefault(r => r.Wavelengths != null);
+                        if (firstRecordWithWavelengths != null && colIdx < firstRecordWithWavelengths.Wavelengths.Length)
+                            rowVals.Add(firstRecordWithWavelengths.Wavelengths[colIdx].ToString("F4", CultureInfo.InvariantCulture));
+                        else
+                            rowVals.Add(colIdx.ToString());
+
+                        for (int posIdx = 0; posIdx < records.Count; posIdx++)
                         {
-                            double[] avgs = positionAverages[posIdx];
-                            double val = (colIdx < avgs.Length) ? avgs[colIdx] : 0.0;
-                            rowVals.Add(val.ToString("F4", System.Globalization.CultureInfo.InvariantCulture));
+                            var r = records[posIdx];
+                            double val = (r.CombinedAverages != null && colIdx < r.CombinedAverages.Length) ? r.CombinedAverages[colIdx] : 0.0;
+                            rowVals.Add(val.ToString("F4", CultureInfo.InvariantCulture));
                         }
                         sw.WriteLine(string.Join(",", rowVals));
                     }
@@ -1318,9 +1309,38 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             }
             catch (Exception ex)
             {
-                // Surface the error rather than silently dropping it
                 Dispatcher.Invoke(() => TerminalText.AppendText($"Error saving combined CSV: {ex.Message}\n"));
             }
+        }
+
+        private double[] GetWavelengths(IImageDataSet dataSet)
+        {
+            if (dataSet == null) return null;
+            try
+            {
+                string xmlText = _app.FileManager.GetXml(dataSet);
+                XmlDocument xDoc = new XmlDocument();
+                xDoc.LoadXml(xmlText);
+
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(xDoc.NameTable);
+                nsmgr.AddNamespace("pi", "http://www.princetoninstruments.com/spe/2009");
+
+                XmlNode waveMapping = xDoc.SelectSingleNode("//pi:Calibrations/pi:WavelengthMapping", nsmgr);
+                if (waveMapping != null)
+                {
+                    XmlNode waves = waveMapping.SelectSingleNode("pi:Wavelength", nsmgr);
+                    if (waves != null)
+                    {
+                        string[] split = waves.InnerText.Split(',');
+                        double[] wls = new double[split.Length];
+                        for (int i = 0; i < split.Length; i++)
+                            wls[i] = XmlConvert.ToDouble(split[i]);
+                        return wls;
+                    }
+                }
+            }
+            catch { /* Ignore parsing errors */ }
+            return null;
         }
 
         private void SaveDataSetToPng(IImageDataSet dataset, string filepath)
@@ -1376,35 +1396,122 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                 return new double[0][];
             }
         }
-        private void SaveDataSetToCsv(IImageDataSet dataset, string filepath)
+        private void SaveCachedDataToCsv(ScanPointRecord record, string filepath)
         {
             try
             {
-                IImageData frame = dataset.GetFrame(0, 0);
-                Array rawData = frame.GetData();
-                int width = frame.Width;
-                int height = frame.Height;
+                if (record.AllRoiData == null || record.AllRoiData.Count == 0) return;
+                
+                int width = record.AllRoiData[0][0].Length;
+                int totalHeight = record.AllRoiData.Sum(roi => roi.Length);
 
                 string dir = System.IO.Path.GetDirectoryName(filepath);
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
                 using (StreamWriter sw = new StreamWriter(filepath))
                 {
-                    for (int r = 0; r < height; r++)
+                    // Header row
+                    var headers = new List<string>();
+                    headers.Add("Wavelength");
+                    for (int row = 0; row < totalHeight; row++) headers.Add($"Row_{row}");
+                    sw.WriteLine(string.Join(",", headers));
+
+                    for (int c = 0; c < width; c++)
                     {
-                        var row = new List<string>();
-                        for (int c = 0; c < width; c++)
+                        var line = new List<string>();
+                        
+                        // First column: Wavelength
+                        if (record.Wavelengths != null && c < record.Wavelengths.Length)
+                            line.Add(record.Wavelengths[c].ToString("F4", CultureInfo.InvariantCulture));
+                        else
+                            line.Add(c.ToString());
+
+                        foreach (var roi in record.AllRoiData)
                         {
-                            row.Add(rawData.GetValue(r * width + c).ToString());
+                            for (int r = 0; r < roi.Length; r++)
+                            {
+                                line.Add(roi[r][c].ToString());
+                            }
                         }
-                        sw.WriteLine(string.Join(",", row));
+                        sw.WriteLine(string.Join(",", line));
                     }
                 }
             }
             catch (Exception ex)
             {
-                // Ignore silent failure
+                Dispatcher.Invoke(() => TerminalText.AppendText($"Error saving {filepath}: {ex.Message}\n"));
             }
+        }
+
+        private double[] GetCombinedAverages(IImageDataSet dataset)
+        {
+            if (dataset == null || dataset.Regions.Length == 0) return null;
+            
+            IImageData firstFrame = dataset.GetFrame(0, 0);
+            int width = firstFrame.Width;
+            double[] colSums = new double[width];
+            int totalRows = 0;
+
+            for (int roi = 0; roi < dataset.Regions.Length; roi++)
+            {
+                IImageData frame = dataset.GetFrame(roi, 0);
+                Array rawData = frame.GetData();
+                int h = frame.Height;
+                int w = frame.Width;
+
+                for (int x = 0; x < w && x < width; x++)
+                {
+                    double sum = 0;
+                    for (int y = 0; y < h; y++)
+                        sum += Convert.ToDouble(rawData.GetValue(y * w + x));
+                    colSums[x] += sum;
+                }
+                totalRows += h;
+            }
+
+            double[] averages = new double[width];
+            if (totalRows > 0)
+                for (int x = 0; x < width; x++)
+                    averages[x] = colSums[x] / totalRows;
+            
+            return averages;
+        }
+
+        private List<double[][]> GetAllRoiData(IImageDataSet dataset)
+        {
+            var allData = new List<double[][]>();
+            for (int roi = 0; roi < dataset.Regions.Length; roi++)
+            {
+                IImageData frame = dataset.GetFrame(roi, 0);
+                Array rawData = frame.GetData();
+                int w = frame.Width;
+                int h = frame.Height;
+                var roiRows = new double[h][];
+                for (int r = 0; r < h; r++)
+                {
+                    var row = new double[w];
+                    for (int c = 0; c < w; c++)
+                        row[c] = Convert.ToDouble(rawData.GetValue(r * w + c));
+                    roiRows[r] = row;
+                }
+                allData.Add(roiRows);
+            }
+            return allData;
+        }
+
+        private void SaveDataSetToCsv(IImageDataSet dataset, string filepath)
+        {
+            // Fallback for immediate saving during scan if needed
+            var wavelengths = GetWavelengths(dataset);
+            var averages = GetCombinedAverages(dataset);
+            var allRoiData = GetAllRoiData(dataset);
+            var record = new ScanPointRecord { Wavelengths = wavelengths, CombinedAverages = averages, AllRoiData = allRoiData };
+            SaveCachedDataToCsv(record, filepath);
+        }
+
+        private void ExportIndividualCheck_Checked(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
