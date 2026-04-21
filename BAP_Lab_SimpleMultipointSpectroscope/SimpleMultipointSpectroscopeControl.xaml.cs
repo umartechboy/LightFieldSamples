@@ -59,6 +59,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
         // ── Grid Object State ──────────────────────────────────────────────────
         private ObservableCollection<ScanPointUI> _gridPoints;
         private CancellationTokenSource _scanCts;
+        private double[] _cachedWavelengths;
         private readonly List<ScanPointRecord> _scanRecords = new List<ScanPointRecord>();
 
         public class ScanPointRecord
@@ -837,6 +838,7 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
             // Run Background Task
             try
             {
+                await RefreshWavelengthCalibration();
                 await Task.Run(() => ScanLoop(path, feedRate, dwell, frames, token), token);
             }
             catch (OperationCanceledException)
@@ -1315,6 +1317,12 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
 
         private double[] GetWavelengths(IImageDataSet dataSet)
         {
+            if (_cachedWavelengths != null) return _cachedWavelengths;
+            return GetWavelengthsInternal(dataSet);
+        }
+
+        private double[] GetWavelengthsInternal(IImageDataSet dataSet)
+        {
             if (dataSet == null) return null;
             try
             {
@@ -1339,8 +1347,67 @@ namespace LightFieldAddInSamples.BAP_Lab_SimpleMultipointSpectroscope
                     }
                 }
             }
-            catch { /* Ignore parsing errors */ }
+            catch (Exception ex)
+            {
+                // Silently fail or log to terminal if needed
+            }
             return null;
+        }
+
+        private async Task RefreshWavelengthCalibration()
+        {
+            Dispatcher.Invoke(() => ScanStatusText.Text = "Refreshing Calibration...");
+            
+            // 1. Save state
+            string originalBaseName = (string)_experiment.GetValue(ExperimentSettings.FileNameGenerationBaseFileName);
+            bool originalAttachDate = (bool)_experiment.GetValue(ExperimentSettings.FileNameGenerationAttachDate);
+            bool originalAttachTime = (bool)_experiment.GetValue(ExperimentSettings.FileNameGenerationAttachTime);
+            
+            try
+            {
+                _experiment.SetValue(ExperimentSettings.FileNameGenerationBaseFileName, "_TMP_CALIBRATION_");
+                _experiment.SetValue(ExperimentSettings.FileNameGenerationAttachDate, false);
+                _experiment.SetValue(ExperimentSettings.FileNameGenerationAttachTime, false);
+
+                var tcs = new TaskCompletionSource<bool>();
+                EventHandler<ExperimentCompletedEventArgs> handler = null;
+                handler = (s, e) => {
+                    _experiment.ExperimentCompleted -= handler;
+                    tcs.TrySetResult(true);
+                };
+                _experiment.ExperimentCompleted += handler;
+
+                _experiment.Acquire();
+                await tcs.Task;
+
+                string recentlySavedFile = _app.FileManager.GetRecentlyAcquiredFileNames().FirstOrDefault();
+                IImageDataSet ds = null;
+                try
+                {
+                    ds = _app.FileManager.OpenFile(recentlySavedFile, FileAccess.Read);
+                    if (ds != null)
+                    {
+                        _cachedWavelengths = GetWavelengthsInternal(ds);
+                        ds.Dispose();
+                    }
+                    try { if (File.Exists(recentlySavedFile)) File.Delete(recentlySavedFile); } catch { }
+                }
+                catch (Exception ex)
+                {
+                    Dispatcher.Invoke(() => TerminalText.AppendText($"Calibration File Error: {ex.Message}\n"));
+                }
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.Invoke(() => TerminalText.AppendText($"Calibration Error: {ex.Message}\n"));
+            }
+            finally
+            {
+                _experiment.SetValue(ExperimentSettings.FileNameGenerationBaseFileName, originalBaseName);
+                _experiment.SetValue(ExperimentSettings.FileNameGenerationAttachDate, originalAttachDate);
+                _experiment.SetValue(ExperimentSettings.FileNameGenerationAttachTime, originalAttachTime);
+                Dispatcher.Invoke(() => ScanStatusText.Text = "Calibration Ready.");
+            }
         }
 
         private void SaveDataSetToPng(IImageDataSet dataset, string filepath)
